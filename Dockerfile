@@ -1,5 +1,5 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim
+# Use Miniconda3 image as base
+FROM continuumio/miniconda3
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -10,13 +10,25 @@ WORKDIR /code
 
 # Install system dependencies
 RUN apt-get update \
-&& apt-get -y install netcat-openbsd gcc \
-&& apt-get clean
+    && apt-get -y install netcat-openbsd gcc g++ libgl1\
+    && apt-get clean 
 
-# Install Python dependencies
-COPY requirements.txt /code/
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+
+# Copy environment.yml file
+COPY environment.yml /code/
+
+# Create the Conda environment
+RUN conda env create -f environment.yml
+
+# Make sure the environment is activated
+SHELL ["conda", "run", "-n", "virtualenv", "/bin/bash", "-c"]
+
+# Install mmcv separately to avoid build issues
+
+#ENV MMCV_WITH_OPS=1
+ENV FORCE_CUDA=1
+ENV CUDA_HOME=/usr/local/cuda
+RUN conda run -n virtualenv pip install mmcv==2.1.0
 
 # Add the rest of the code
 COPY . /code/
@@ -27,7 +39,11 @@ EXPOSE 8000
 # Command to run the application
 WORKDIR /code/vlp
 
-# run collectstatic
-RUN python manage.py collectstatic --noinput
+# Run Django collectstatic
+RUN conda run -n virtualenv python manage.py collectstatic --noinput
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
+# Run Django tests
+RUN conda run -n virtualenv python manage.py test poseestimator
+
+# Command to start the server
+CMD ["conda", "run", "--no-capture-output", "-n", "virtualenv", "gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
