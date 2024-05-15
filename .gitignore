@@ -161,3 +161,9 @@ cython_debug/
 
 *.env
 .env
+
+*.png
+*.jpg
+*.jpeg
+
+!800Kräfte_auf_skifahrer_am_hang.jpeg
