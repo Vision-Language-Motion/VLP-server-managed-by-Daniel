@@ -22,6 +22,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'False') == 'True'
 ENV = os.environ.get('ENVIRONMENT', 'production')
 DO_DATA_BASE_PASSWORD = os.environ.get('DO_DATABASE_PASSWORD', None)
+AUTH_PASSWORD_FOR_REQUESTS = os.environ.get('AUTH_PASSWORD', None)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -66,7 +67,7 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
