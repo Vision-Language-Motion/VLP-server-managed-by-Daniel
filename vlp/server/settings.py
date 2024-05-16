@@ -22,7 +22,7 @@ load_dotenv()
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'False') == 'True'
 ENV = os.environ.get('ENVIRONMENT', 'production')
-DO_DATA_BASE_PASSWORD = os.environ.get('DO_DATABASE_PASSWORD', None)
+DO_DATABASE_PASSWORD = os.environ.get('DO_DATABASE_PASSWORD', None)
 AUTH_PASSWORD_FOR_REQUESTS = os.environ.get('AUTH_PASSWORD', None)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -103,7 +103,7 @@ else:
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'defaultdb',
             'USER': 'doadmin',
-            'PASSWORD': DO_DATA_BASE_PASSWORD,
+            'PASSWORD': DO_DATABASE_PASSWORD,
             'HOST': 'vlp-database-docker-do-user-10555764-0.c.db.ondigitalocean.com',  # This should match the service name in docker-compose
             'PORT': '25060',
             'OPTIONS': {

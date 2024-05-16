@@ -5,6 +5,8 @@ ARG DO_DATABASE_PASSWORD
 ARG AUTH_PASSWORD
 
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
+ENV DO_DATABASE_PASSWORD=${DO_DATABASE_PASSWORD}
+ENV AUTH_PASSWORD=${AUTH_PASSWORD}
 
 # To fix GPG key error when running apt-get update
 RUN rm /etc/apt/sources.list.d/cuda.list \
@@ -34,8 +36,7 @@ EXPOSE 8000
 
 WORKDIR /code/vlp
 
-ENV DO_DATABASE_PASSWORD=${DO_DATABASE_PASSWORD}
-ENV AUTH_PASSWORD=${AUTH_PASSWORD}
+
 
 RUN python manage.py collectstatic --noinput
 
