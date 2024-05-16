@@ -8,6 +8,10 @@ FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 ENV DO_DATABASE_PASSWORD=${DO_DATABASE_PASSWORD}
 ENV AUTH_PASSWORD=${AUTH_PASSWORD}
 
+RUN echo "Database Password: $DO_DATABASE_PASSWORD"
+RUN python -c "import os; print('DB Password from Python:', os.getenv('DO_DATABASE_PASSWORD'))"
+
+
 # To fix GPG key error when running apt-get update
 RUN rm /etc/apt/sources.list.d/cuda.list \
     && rm /etc/apt/sources.list.d/nvidia-ml.list \

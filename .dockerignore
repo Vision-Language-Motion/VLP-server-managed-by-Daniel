@@ -10,4 +10,5 @@ local
 include
 build
 dist
-
+.env
+*.env
