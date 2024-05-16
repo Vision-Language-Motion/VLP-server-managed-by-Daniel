@@ -30,6 +30,8 @@ RUN pip install Django djangorestframework python-dotenv gunicorn
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
+RUN cd /code/vlp
+
 RUN python manage.py collectstatic --noinput
 
 RUN python manage.py test poseestimator
