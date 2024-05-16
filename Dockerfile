@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 \
 
 # Install mmcv
 ARG MMCV=""
-RUN if [ "${MMCV}" = "" ]; then pip install -U openmim && mim install 'mmcv>=2.0.0rc1'; else pip install -U openmim && mim install mmcv==${MMCV}; fi
+RUN if [ "${MMCV}" = "" ]; then pip install -U openmim && mim install 'mmcv>=2.0.0rc1' && mim install mmpose; else pip install -U openmim && mim install mmcv==${MMCV} && mim install mmpose; fi
 
 # Verify the installation
 RUN python -c 'import mmcv;print(mmcv.__version__)'
