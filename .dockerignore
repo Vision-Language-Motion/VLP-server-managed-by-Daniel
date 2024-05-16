@@ -3,7 +3,6 @@ __pycache__
 *.pyo
 *.pyd
 .Python
-.env
 *.venv
 venv
 bin
@@ -11,5 +10,3 @@ local
 include
 build
 dist
-
-*.env
