@@ -1,6 +1,8 @@
 ARG PYTORCH="1.8.1"
 ARG CUDA="10.2"
 ARG CUDNN="7"
+ARG DO_DATABASE_PASSWORD
+ARG AUTH_PASSWORD
 
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 
@@ -32,7 +34,12 @@ EXPOSE 8000
 
 WORKDIR /code/vlp
 
+ENV DO_DATABASE_PASSWORD=${DO_DATABASE_PASSWORD}
+ENV AUTH_PASSWORD=${AUTH_PASSWORD}
+
 RUN python manage.py collectstatic --noinput
+
+
 
 RUN python manage.py test poseestimator
 
