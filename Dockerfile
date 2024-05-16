@@ -7,8 +7,6 @@ ARG AUTH_PASSWORD
 ARG DO_DATABASE_PASSWORD
 ENV DO_DATABASE_PASSWORD=$DO_DATABASE_PASSWORD
 ENV AUTH_PASSWORD=$AUTH_PASSWORD
-RUN echo "Database Password env: '$DO_DATABASE_PASSWORD'"
-
 
 # To fix GPG key error when running apt-get update
 RUN rm /etc/apt/sources.list.d/cuda.list \
@@ -38,12 +36,10 @@ EXPOSE 8000
 
 WORKDIR /code/vlp
 
-
+RUN python manage.py makemigrations && python manage.py migrate
 
 RUN python manage.py collectstatic --noinput
 
-
-
-RUN python manage.py test poseestimator
+# RUN python manage.py test poseestimator
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
