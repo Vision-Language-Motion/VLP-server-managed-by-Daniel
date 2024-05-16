@@ -24,8 +24,8 @@ RUN python -c 'import mmcv;print(mmcv.__version__)'
 
 # Add the rest of the code
 COPY . /code/
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+
+RUN pip install Django djangorestframework python-dotenv gunicorn
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
