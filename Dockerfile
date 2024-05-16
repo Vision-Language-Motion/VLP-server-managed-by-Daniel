@@ -11,7 +11,7 @@ RUN rm /etc/apt/sources.list.d/cuda.list \
     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
 
 # Install system dependencies for opencv-python
-RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 \
+RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 build-dep python-psycopg2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,7 +25,7 @@ RUN python -c 'import mmcv;print(mmcv.__version__)'
 # Add the rest of the code
 COPY . /code/
 
-RUN pip install Django djangorestframework python-dotenv gunicorn
+RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary 
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
