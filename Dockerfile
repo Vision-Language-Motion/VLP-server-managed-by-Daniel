@@ -1,49 +1,35 @@
-# Use Miniconda3 image as base
-FROM continuumio/miniconda3
+ARG PYTORCH="1.8.1"
+ARG CUDA="10.2"
+ARG CUDNN="7"
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 
-# Set work directory
-WORKDIR /code
+# To fix GPG key error when running apt-get update
+RUN rm /etc/apt/sources.list.d/cuda.list \
+    && rm /etc/apt/sources.list.d/nvidia-ml.list \
+    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub \
+    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get -y install netcat-openbsd gcc g++ libgl1\
-    && apt-get clean 
+# Install system dependencies for opencv-python
+RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+# Install mmcv
+ARG MMCV=""
+RUN if [ "${MMCV}" = "" ]; then pip install -U openmim && mim install 'mmcv>=2.0.0rc1'; else pip install -U openmim && mim install mmcv==${MMCV}; fi
 
-# Copy environment.yml file
-COPY environment.yml /code/
-
-# Create the Conda environment
-RUN conda env create -f environment.yml
-
-# Make sure the environment is activated
-SHELL ["conda", "run", "-n", "virtualenv", "/bin/bash", "-c"]
-
-# Install mmcv separately to avoid build issues
-
-#ENV MMCV_WITH_OPS=1
-ENV FORCE_CUDA=1
-ENV CUDA_HOME=/usr/local/cuda
-RUN conda run -n virtualenv pip install mmcv==2.1.0
+# Verify the installation
+RUN python -c 'import mmcv;print(mmcv.__version__)'
 
 # Add the rest of the code
 COPY . /code/
 
+RUN pip install -r requirements.txt
+
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
-# Command to run the application
-WORKDIR /code/vlp
+RUN python manage.py collectstatic --noinput
 
-# Run Django collectstatic
-RUN conda run -n virtualenv python manage.py collectstatic --noinput
-
-# Run Django tests
-RUN conda run -n virtualenv python manage.py test poseestimator
-
-# Command to start the server
-CMD ["conda", "run", "--no-capture-output", "-n", "virtualenv", "gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
+RUN python manage.py test poseestimator
