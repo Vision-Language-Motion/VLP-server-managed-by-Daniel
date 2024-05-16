@@ -35,3 +35,5 @@ WORKDIR /code/vlp
 RUN python manage.py collectstatic --noinput
 
 RUN python manage.py test poseestimator
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
