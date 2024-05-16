@@ -29,7 +29,7 @@ RUN python -c 'import mmcv;print(mmcv.__version__)'
 # Add the rest of the code
 COPY . /code/
 
-RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary 
+RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary whitenoise
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
