@@ -11,7 +11,7 @@ RUN rm /etc/apt/sources.list.d/cuda.list \
     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
 
 # Install system dependencies for opencv-python
-RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 build-dep python-psycopg2 \
+RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 python-psycopg2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
