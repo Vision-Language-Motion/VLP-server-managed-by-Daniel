@@ -11,10 +11,12 @@ class Video(models.Model):
     MULTIPLE = 'M'
     SINGLE = 'S'
     NONE = '-'
+    UNKNOWN = '?'
     HUMAN_CHOICES = [
         (MULTIPLE, 'Multiple'),
         (SINGLE, 'Single'),
         (NONE, 'None'),
+        (UNKNOWN, 'Unknown'),
     ]
     human_presence = models.CharField(max_length=1, choices=HUMAN_CHOICES, blank=True, null=True)
 
@@ -31,3 +33,7 @@ class Video(models.Model):
 
     def __str__(self):
         return self.url
+    
+    def __init__(self, *args, **kwargs):
+        super(Video, self).__init__(*args, **kwargs)
+        self._processed_by_signal = False

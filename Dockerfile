@@ -15,7 +15,7 @@ RUN rm /etc/apt/sources.list.d/cuda.list \
     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
 
 # Install system dependencies for opencv-python
-RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 python-psycopg2 \
+RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 python-psycopg2 redis-server \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -26,10 +26,13 @@ RUN if [ "${MMCV}" = "" ]; then pip install -U openmim && mim install 'mmcv>=2.0
 # Verify the installation
 RUN python -c 'import mmcv;print(mmcv.__version__)'
 
+RUN pip install importlib-metadata==4.13.0
+
+RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary whitenoise celery==5.1.0 redis --verbose
+
+
 # Add the rest of the code
 COPY . /code/
-
-RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary whitenoise
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
