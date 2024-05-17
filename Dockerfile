@@ -8,6 +8,8 @@ ARG DO_DATABASE_PASSWORD
 ENV DO_DATABASE_PASSWORD=$DO_DATABASE_PASSWORD
 ENV AUTH_PASSWORD=$AUTH_PASSWORD
 
+
+
 # To fix GPG key error when running apt-get update
 RUN rm /etc/apt/sources.list.d/cuda.list \
     && rm /etc/apt/sources.list.d/nvidia-ml.list \
@@ -31,6 +33,8 @@ RUN pip install importlib-metadata==4.13.0
 RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary whitenoise celery==5.1.0 redis --verbose
 
 
+
+
 # Add the rest of the code
 COPY . /code/
 
@@ -39,10 +43,19 @@ EXPOSE 8000
 
 WORKDIR /code/vlp
 
+#RUN redis-server --daemonize yes
+
+# RUN celery -A server worker -l info
+
 RUN python manage.py makemigrations && python manage.py migrate
 
 RUN python manage.py collectstatic --noinput
 
+
+#COPY start_docker.sh /code/start_docker.sh
+RUN chmod +x /code/start_docker.sh
+
 # RUN python manage.py test poseestimator
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
+CMD ["/code/start_docker.sh"]
