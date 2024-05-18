@@ -9,4 +9,4 @@ docker build --build-arg DO_DATABASE_PASSWORD=$(grep DO_DATABASE_PASSWORD .env |
              -t prodbuild .
 ```
 then
-`docker run -p 80:8000`
+`docker run -p 80:8000 prodbuild`
