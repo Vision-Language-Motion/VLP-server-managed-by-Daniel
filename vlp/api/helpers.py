@@ -18,5 +18,3 @@ def download_video(url):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
-#Test
-# download_video("https://www.youtube.com/shorts/4YCfglGQHfI")
