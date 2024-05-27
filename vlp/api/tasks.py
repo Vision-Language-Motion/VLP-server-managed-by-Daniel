@@ -9,3 +9,4 @@ def process_video_without_human(url):
     
     logger.warn(f"Processing video for URL: {url}")
     # Add your task implementation here
+    
