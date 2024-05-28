@@ -1,7 +1,11 @@
+import os
 import yt_dlp as youtube_dl
+from server.settings import BASE_DIR
+
 # Helper functions
 
-download_directory = 'vlp/youtube-downloads'
+# Definining download directory
+download_directory = os.path.join(BASE_DIR,'youtube-downloads')
 
 
 def download_video(url):
