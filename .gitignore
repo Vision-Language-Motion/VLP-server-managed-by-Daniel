@@ -167,3 +167,8 @@ cython_debug/
 *.jpeg
 
 !800Kräfte_auf_skifahrer_am_hang.jpeg
+
+*.mp3
+*.mov
+*.mp4
+*.part
