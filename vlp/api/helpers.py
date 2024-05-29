@@ -25,4 +25,12 @@ def download_video(url):
     # Create a YoutubeDL object with the options
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
+    
+    video_id = youtube_dl.YoutubeDL().extract_info(url, download=False)['id']
+    dir = f"{download_directory}/{video_id}.mp4"
+    return dir
+
+
+
+   
 
