@@ -27,8 +27,8 @@ def download_video(url):
         ydl.download([url])
     
     video_id = youtube_dl.YoutubeDL().extract_info(url, download=False)['id']
-    dir = f"{download_directory}/{video_id}.mp4"
-    return dir
+    file_path = f"{download_directory}/{video_id}.mp4"
+    return file_path
 
 
 
