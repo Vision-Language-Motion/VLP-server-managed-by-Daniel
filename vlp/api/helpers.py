@@ -26,3 +26,14 @@ def download_video(url):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
+
+
+def delete(file):
+    ''' This function checks if a file (/the directory) exists and deletes it'''
+    if (os.path.exists(file)):
+        os.remove(file)
+        return
+ 
+    print (f'File: {file}, does not exist')
+    return
+    
