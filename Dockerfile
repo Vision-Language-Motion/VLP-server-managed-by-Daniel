@@ -47,6 +47,7 @@ WORKDIR /code/vlp
 
 # RUN celery -A server worker -l info
 
+
 RUN python manage.py makemigrations && python manage.py migrate
 
 RUN python manage.py collectstatic --noinput
@@ -58,4 +59,9 @@ RUN chmod +x /code/start_docker.sh
 # RUN python manage.py test poseestimator
 
 # CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
-CMD ["/code/start_docker.sh"]
+
+ARG TEST="false"
+RUN if [ "${TEST}" = "true" ]; then python manage.py test --noinput --keepdb; fi
+
+# Comment this out if you're just testing
+CMD ["/code/start_docker.sh"] 
