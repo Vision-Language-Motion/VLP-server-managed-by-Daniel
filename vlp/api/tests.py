@@ -6,36 +6,32 @@ from server.settings import BASE_DIR
 # Create your tests here.
 
 '''testing download_video function'''
-
-class download_video_TestCase(TestCase):
+'''
+class DownloadVideoTest(TestCase):
     def setUp(self):
-        # Set up a test Client
-        self.client = Client()
-        # Directory where files should be downloaded
-        self.download_directory = os.path.join(BASE_DIR,'youtube-downloads')
-        # Ensure the directory exists
-        os.makedirs(self.download_directory, exist_ok=True)
-
-    def test_directory(self):
-         # Simulate a file download request
-        response = self.client.get('/path/to/download/endpoint/')
-        
-        # Check if the response status is OK (200)
-        self.assertEqual(response.status_code, 200)
-        
-        # Get the filename from the response headers or any other way your app specifies the filename
-        filename = response['Content-Disposition'].split('filename=')[-1].strip('"')
-        
-        # Construct the expected file path
-        file_path = os.path.join(self.download_directory, filename)
-        
-        # Check if the file exists in the expected directory
-        self.assertTrue(os.path.exists(file_path))
-    
+        self.download_dir = 'download_directory'
+        if not os.path.exists(self.download_dir):
+            os.makedirs(self.download_dir)
 
     def tearDown(self):
-         # Clean up the download directory after the test
-        for filename in os.listdir(self.download_directory):
-            file_path = os.path.join(self.download_directory, filename)
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
+        if os.path.exists(self.download_dir):
+            for filename in os.listdir(self.download_dir):
+                file_path = os.path.join(self.download_dir, filename)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    print(f'Error: {e}')
+            os.rmdir(self.download_dir)
+
+    def test_download_video(self):
+        url = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
+        result = download_video(url)
+
+        # Check if the file was downloaded to the correct folder
+        self.assertTrue(os.path.exists(result))
+        self.assertTrue(result.endswith('.mp4'))
+
+        # Verify file size is greater than 0 to ensure it's not empty
+        self.assertGreater(os.path.getsize(result), 0)
+'''
