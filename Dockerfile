@@ -60,5 +60,5 @@ RUN chmod +x /code/start_docker.sh
 
 # CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
 
-ARG TEST="false"
+ARG TEST="true"
 RUN if [ "${TEST}" = "true" ]; then python manage.py test --noinput --keepdb; else /code/start_docker.sh; fi

@@ -1,37 +1,19 @@
 from django.test import TestCase, Client
 import os
-from helpers import download_directory, download_video
+from .helpers import download_directory, download_video
 from server.settings import BASE_DIR
 
 # Create your tests here.
 
 '''testing download_video function'''
-'''
+
 class DownloadVideoTest(TestCase):
-    def setUp(self):
-        self.download_dir = 'download_directory'
-        if not os.path.exists(self.download_dir):
-            os.makedirs(self.download_dir)
+    def test_video_download(self):
+        # Replace 'your_video_url' with the actual URL of the video you want to download
+        video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
+        
+        # Download the video
+        video_path = download_video(video_url)
 
-    def tearDown(self):
-        if os.path.exists(self.download_dir):
-            for filename in os.listdir(self.download_dir):
-                file_path = os.path.join(self.download_dir, filename)
-                try:
-                    if os.path.isfile(file_path):
-                        os.unlink(file_path)
-                except Exception as e:
-                    print(f'Error: {e}')
-            os.rmdir(self.download_dir)
-
-    def test_download_video(self):
-        url = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
-        result = download_video(url)
-
-        # Check if the file was downloaded to the correct folder
-        self.assertTrue(os.path.exists(result))
-        self.assertTrue(result.endswith('.mp4'))
-
-        # Verify file size is greater than 0 to ensure it's not empty
-        self.assertGreater(os.path.getsize(result), 0)
-'''
+        # Check if the file exists in the expected directory
+        assert(os.path.exists(video_path))
