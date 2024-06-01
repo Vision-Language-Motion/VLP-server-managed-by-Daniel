@@ -9,11 +9,13 @@ from server.settings import BASE_DIR
 
 class DownloadVideoTest(TestCase):
     def test_video_download(self):
-        # Replace 'your_video_url' with the actual URL of the video you want to download
+        '''Testing the download_video function by downloading a video 
+           and then checking if it exist in the download directory '''
+        #The video we are using for this Test 
         video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
-        
+    
         # Download the video
         video_path = download_video(video_url)
 
-        # Check if the file exists in the expected directory
+        # Check if the file exists in the download directory
         assert(os.path.exists(video_path))
