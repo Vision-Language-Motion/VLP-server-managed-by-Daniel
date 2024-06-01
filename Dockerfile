@@ -61,4 +61,7 @@ RUN chmod +x /code/start_docker.sh
 # CMD ["gunicorn", "--bind", "0.0.0.0:8000", "server.wsgi:application"]
 
 ARG TEST="true"
-RUN if [ "${TEST}" = "true" ]; then python manage.py test --noinput --keepdb; else /code/start_docker.sh; fi
+RUN if [ "${TEST}" = "true" ]; then python manage.py test --noinput --keepdb; fi
+
+# Comment this out if you're just testing
+CMD ["/code/start_docker.sh"] 
