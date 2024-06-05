@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 import os
-from .helpers import download_directory, download_video
+from .helpers import download_directory, download_video, delete_file
 from server.settings import BASE_DIR
 
 # Create your tests here.
@@ -19,3 +19,18 @@ class DownloadVideoTest(TestCase):
 
         # Check if the file exists in the download directory
         assert(os.path.exists(video_path))
+
+class DeleteTest(TestCase):
+    def test_delete_file(self):
+        '''Testing the delete_file function by downloading a video deleting the file 
+           and checking if it exists afterwards'''
+        # Creating test file
+        file_path = download_video('https://www.youtube.com/shorts/AsrP4ji_Dtw')
+        
+        # Delete the file
+        delete_file(file_path)
+
+        # Checking if the file exists
+        assert(not (os.path.exists(file_path)))
+
+    

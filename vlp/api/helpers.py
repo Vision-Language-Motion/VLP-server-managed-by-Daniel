@@ -7,7 +7,7 @@ from server.settings import BASE_DIR
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
 
-
+# Download
 def download_video(url):
     """
     This function creates a variable ydl_opts containing how the video should be downloaded 
@@ -31,6 +31,9 @@ def download_video(url):
     return file_path
 
 
-
-   
-
+# Delete 
+def delete_file(file_path):
+    ''' This function checks if a file (/the directory) exists and deletes it'''
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    

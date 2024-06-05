@@ -10,5 +10,6 @@ def process_video_without_human(url):
     
     logger.warn(f"Processing video for URL: {url}")
     # Add your task implementation here
-    # download_video(url)
+    # file_path = download_video(url)
+    # delete(file_path)
     
