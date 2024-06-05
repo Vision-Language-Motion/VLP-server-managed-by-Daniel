@@ -172,3 +172,5 @@ cython_debug/
 *.mov
 *.mp4
 *.part
+
+*.json

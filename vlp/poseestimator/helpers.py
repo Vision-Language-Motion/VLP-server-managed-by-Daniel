@@ -1,7 +1,10 @@
 import logging
 logger = logging.getLogger(__name__)
+import os
+from server.settings import BASE_DIR
 
-def get_pose_inference(filepath="poseestimator/800Kräfte_auf_skifahrer_am_hang.jpeg"):
+#def get_pose_inference(filepath="poseestimator/800Kräfte_auf_skifahrer_am_hang.jpeg"):
+def get_pose_inference(filepath="poseestimator/MenschenNebeneinander.jpg"):
     """Uses MMPose to infer poses from an image. Result format
     
     dictionary with keys:
@@ -13,8 +16,13 @@ def get_pose_inference(filepath="poseestimator/800Kräfte_auf_skifahrer_am_hang.
     """
     from .apps import pose_inferencer
 
-    result_generator = pose_inferencer(filepath)
+
+    vis_out_path = os.path.join(BASE_DIR, "poseestimator/predictions")
+
+    result_generator = pose_inferencer(filepath, pred_out_dir=os.path.join(BASE_DIR, "poseestimator/predictions"), vis_out_dir=vis_out_path, draw_bbox=True)
     result = next(result_generator)
+
+
 
     logger.warn(result)
     return result
