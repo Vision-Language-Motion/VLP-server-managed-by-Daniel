@@ -16,3 +16,11 @@ then
 ```bash
 docker build --build-arg DO_DATABASE_PASSWORD=$(grep DO_DATABASE_PASSWORD .env | cut -d '=' -f2)              --build-arg AUTH_PASSWORD=$(grep AUTH_PASSWORD .env | cut -d '=' -f2) --build-arg TEST="true"            -t testbuild .
 ```
+
+### Git lfs
+
+Install git-lfs (for the pytorch models): (On Ubuntu)
+
+```bash
+git lfs install
+```
