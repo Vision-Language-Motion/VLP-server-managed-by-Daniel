@@ -1,6 +1,7 @@
 import os
 import yt_dlp as youtube_dl
 from server.settings import BASE_DIR
+from moviepy.editor import VideoFileClip
 
 # Helper functions
 
@@ -37,3 +38,12 @@ def delete_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
     
+# Screenshots
+def take_screenshot_at_second(video_path, second, output_path):
+    """
+    This function takes a screenshot of the video at a specific second and saves it to the output_path
+    """
+    
+    video = VideoFileClip(video_path)
+    screenshot = video.get_frame(second)
+    screenshot.save_frame(output_path)
