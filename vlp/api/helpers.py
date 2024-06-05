@@ -1,6 +1,7 @@
 import os
 import yt_dlp as youtube_dl
 from server.settings import BASE_DIR
+from moviepy.editor import VideoFileClip
 
 # Helper functions
 
@@ -36,4 +37,39 @@ def delete_file(file_path):
     ''' This function checks if a file (/the directory) exists and deletes it'''
     if os.path.exists(file_path):
         os.remove(file_path)
-    
+
+    return file_path
+
+# Create/Delete Folder
+def create_folder_from_video_path(video_path):
+    ''' This function creates a folder from the video path'''
+    video_id = video_path.split('.')[0]
+    new_video_directory = os.path.join(BASE_DIR, video_id)  # Create a new directory for the video screenshots
+
+    if not os.path.exists(new_video_directory):
+        os.makedirs(new_video_directory)
+
+    return new_video_directory
+
+
+def delete_folder_from_video_path(video_path):
+    ''' This function deletes a folder from the video path'''
+    video_id = video_path.split('.')[0]
+    video_directory = os.path.join(BASE_DIR, video_id)
+
+    if os.path.exists(video_directory):
+        os.rmdir(video_directory)
+
+    return video_directory
+
+# Screenshots
+def take_screenshot_at_second(video_path, second, output_dir):
+    """
+    This function takes a screenshot of the video at a specific second and saves it to the output_path
+    """
+    output_path = f"{output_dir}/screenshot_at_second_{second}.png"
+
+    video = VideoFileClip(video_path)
+    video.save_frame(output_path, t=second)
+
+    return output_path
