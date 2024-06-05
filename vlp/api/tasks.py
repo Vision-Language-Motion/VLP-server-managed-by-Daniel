@@ -14,7 +14,7 @@ def process_video_without_human(url):
     
 
     file_path = download_video(url)
-    create_folder_from_video_path(file_path)
-    take_screenshot_at_second(file_path, 1, )
-    # delete(file_path)
+    video_dir = create_folder_from_video_path(file_path)
+    take_screenshot_at_second(file_path, 1, video_dir)
+    delete_file(file_path)
     

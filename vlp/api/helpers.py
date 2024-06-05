@@ -63,13 +63,13 @@ def delete_folder_from_video_path(video_path):
     return video_directory
 
 # Screenshots
-def take_screenshot_at_second(video_path, second, output_path):
+def take_screenshot_at_second(video_path, second, output_dir):
     """
     This function takes a screenshot of the video at a specific second and saves it to the output_path
     """
-    
+    output_path = f"{output_dir}/screenshot_at_second_{second}.png"
+
     video = VideoFileClip(video_path)
-    screenshot = video.get_frame(second)
-    screenshot.save_frame(output_path)
+    video.save_frame(output_path, t=second)
 
     return output_path
