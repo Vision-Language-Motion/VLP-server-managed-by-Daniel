@@ -32,12 +32,8 @@ def download_video(url):
 
 
 # Delete 
-def delete(file_path):
+def delete_file(file_path):
     ''' This function checks if a file (/the directory) exists and deletes it'''
-    if (os.path.exists(file_path)):
+    if os.path.exists(file_path):
         os.remove(file_path)
-        return
- 
-    print (f'File: {file_path}, does not exist')
-    return
     
