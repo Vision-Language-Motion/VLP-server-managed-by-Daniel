@@ -39,7 +39,7 @@ def delete_file(file_path):
         os.remove(file_path)
 
 
-# Create Folder
+# Create/Delete Folder
 def create_folder_from_video_path(video_path):
     ''' This function creates a folder from the video path'''
     video_id = video_path.split('.')[0]
@@ -48,6 +48,14 @@ def create_folder_from_video_path(video_path):
     if not os.path.exists(new_video_directory):
         os.makedirs(new_video_directory)
 
+
+def delete_folder_from_video_path(video_path):
+    ''' This function deletes a folder from the video path'''
+    video_id = video_path.split('.')[0]
+    video_directory = os.path.join(BASE_DIR, video_id)
+
+    if os.path.exists(video_directory):
+        os.rmdir(video_directory)
 
 # Screenshots
 def take_screenshot_at_second(video_path, second, output_path):
