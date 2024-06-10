@@ -3,8 +3,6 @@ import yt_dlp as youtube_dl
 from server.settings import BASE_DIR
 from moviepy.editor import VideoFileClip
 
-# Helper functions
-
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
 
@@ -62,14 +60,33 @@ def delete_folder_from_video_path(video_path):
 
     return video_directory
 
+
+def get_video_file_clip(video_path):
+    ''' This function returns a VideoFileClip object from the video path'''
+    video = VideoFileClip(video_path)
+    return video
+
 # Screenshots
-def take_screenshot_at_second(video_path, second, output_dir):
+def take_screenshot_at_second(video : VideoFileClip, second, output_dir):
     """
     This function takes a screenshot of the video at a specific second and saves it to the output_path
     """
     output_path = f"{output_dir}/screenshot_at_second_{second}.png"
 
-    video = VideoFileClip(video_path)
     video.save_frame(output_path, t=second)
 
     return output_path
+
+
+def get_video_duration(video : VideoFileClip):
+    """
+    This function returns the duration of a video in seconds
+    """
+    return video.duration
+
+
+def get_video_area(video : VideoFileClip):
+    """
+    This function returns the area of the video in pixels
+    """
+    return video.size[0] * video.size[1]

@@ -188,7 +188,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console', 'file'],
-        'level': 'WARNING',
+        'level': 'CRITICAL',
     },
 }
 
