@@ -56,6 +56,12 @@ def delete_folder_from_video_path(video_path):
     video_directory = os.path.join(BASE_DIR, video_id)
 
     if os.path.exists(video_directory):
+        for filename in os.listdir(video_directory):
+            file_path = os.path.join(video_directory, filename)
+            try:
+                os.unlink(file_path)  # Remove the file or link
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
         os.rmdir(video_directory)
 
     return video_directory

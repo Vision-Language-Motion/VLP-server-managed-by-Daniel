@@ -20,9 +20,9 @@ def process_video_without_human(url):
 
     logger.warn(f"Processing video for URL: {url}")
 
-    file_path = download_video(url)
-    video_dir = create_folder_from_video_path(file_path)
-    video = get_video_file_clip(file_path)
+    video_file_path = download_video(url)
+    video_dir = create_folder_from_video_path(video_file_path)
+    video = get_video_file_clip(video_file_path)
     
     video_duration = get_video_duration(video)
     video_area = get_video_area(video)
@@ -122,14 +122,8 @@ def process_video_without_human(url):
     logger.warn(f"Video prediction: {prediction}")
     
 
-
-    
-    take_screenshot_at_second(video, 1, video_dir)
-
-
-
-
-    delete_file(file_path)
+    delete_file(video_file_path)
+    delete_folder_from_video_path(video_file_path)
 
     return prediction
     
