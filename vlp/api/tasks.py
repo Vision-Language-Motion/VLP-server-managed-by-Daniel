@@ -57,20 +57,31 @@ def process_video_without_human(url):
         inference_result = get_pose_inference(file_path)
         print(f"Step 2", inference_result)
 
-        number_of_people = len(inference_result['predictions'])
+        number_of_people = len(inference_result['predictions'][0])
         if number_of_people > 1:
             prediction["overall_prediction"] = "multiple"
+            logger.warn("Multiple people detected")
             break
 
         if number_of_people == 1:
 
             prediction["overall_prediction"] = "single"
+            logger.warn("overall prediction: single")
+
             
-            keypoints = inference_result['predictions'][0]['keypoint_scores']
-            bbox = inference_result['predictions'][0]['bbox'][0]
-            bbox_score = inference_result['predictions'][0]['bbox_score']
+            keypoints = inference_result['predictions'][0][0]['keypoint_scores']
+            bbox = inference_result['predictions'][0][0]['bbox'][0]
+            bbox_score = inference_result['predictions'][0][0]['bbox_score']
             
             bbox_area_ratio = get_bbox_area_ratio(bbox, video_area)
+
+            logger.warn(f"bbox_area_ratio: {bbox_area_ratio}")
+            logger.warn(f"bbox_score: {check_bbox_score(bbox_score)}")
+            logger.warn(f"keypoints: {check_keypoint_visibility(keypoints)}")
+            logger.warn(f"max_shoulder_score: {max_shoulder_score(keypoints)}")
+            logger.warn(f"max_knee_score: {max_knee_score(keypoints)}")
+
+
 
             if (bbox_area_ratio > 1/60 and check_bbox_score(bbox_score) and check_keypoint_visibility(keypoints)):
                 # check for HIGH criteria
@@ -79,7 +90,7 @@ def process_video_without_human(url):
                         prediction["quality"] = "high"
                         break
 
-                    prediction["single_predictions"].append({"high"})
+                    prediction["single_predictions"].append("high")
 
                 # check for MEDIUM criteria
                 elif (bbox_area_ratio > 1/30 and three_keypoints_among_shoulders_elbows_hands_visible(keypoints)):
@@ -87,13 +98,19 @@ def process_video_without_human(url):
                         prediction["quality"] = "medium"
                         break
                     
-                    prediction["single_predictions"].append({"medium"})
+                    prediction["single_predictions"].append("medium")
 
                 else:
                     prediction["single_predictions"] = []  # reset the list
                 
                 time += 1  # only skip one second to skip to the next frame
                 just_skipped = False
+            else:
+                time += skip_time
+                just_skipped = True
+                prediction["single_predictions"] = []  # reset the list
+
+        
 
         elif number_of_people == 0:
             time += skip_time
@@ -113,5 +130,7 @@ def process_video_without_human(url):
 
 
     delete_file(file_path)
+
+    return prediction
     
 

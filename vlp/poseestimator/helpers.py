@@ -24,7 +24,7 @@ def get_pose_inference(filepath="poseestimator/MenschenNebeneinander.jpg"):
     vis_out_path = os.path.join(BASE_DIR, "poseestimator/predictions")
     logger.warn(f"In get_pose_inference 2 {filepath}")
 
-    result_generator = pose_inferencer(filepath, pred_out_dir=os.path.join(BASE_DIR, "poseestimator/predictions"))
+    result_generator = pose_inferencer(filepath)
     logger.warn(result_generator)
     result = next(result_generator)
 
