@@ -27,3 +27,5 @@ class PoseestimatorConfig(AppConfig):
         
         pose_inferencer = MMPoseInferencer(pose2d='rtmpose-l', pose2d_weights=pose2d_weights_path, det_model = os.path.join(
             mmpose_path, '.mim', 'demo/mmdetection_cfg/rtmdet_m_640-8xb32_coco-person.py'), det_weights=det_weights_path, det_cat_ids=(0, ))
+
+        logger.warn("PoseestimatorConfig ready")

@@ -20,7 +20,6 @@ def check_video_conditions(sender, instance, **kwargs):
 
         # edit the instance to have a ? as human presence until checked
         instance.human_presence = Video.UNKNOWN
-
         task_id = process_video_without_human.delay(instance.url)
         instance._processed_by_signal = True  # Setze das Flag, um erneute Verarbeitung zu verhindern
 

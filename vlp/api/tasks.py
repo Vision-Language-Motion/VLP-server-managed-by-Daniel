@@ -7,19 +7,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 from poseestimator.helpers import get_bbox_area_ratio, check_bbox_score, check_keypoint_visibility, \
-                                    get_pose_inference, max_shoulder_score, max_knee_score, \
+                                    max_shoulder_score, max_knee_score, get_pose_inference, \
                                     three_keypoints_among_shoulders_elbows_hands_visible
 import time as timeit
 
 
 
-
-
-
-
-@shared_task
+@shared_task()
 def process_video_without_human(url):
-    get_pose_inference()
+    # load the package only when the task is called
+    
+
     logger.warn(f"Processing video for URL: {url}")
 
     file_path = download_video(url)

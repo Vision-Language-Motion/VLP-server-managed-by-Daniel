@@ -3,6 +3,9 @@ logger = logging.getLogger(__name__)
 import os
 from server.settings import BASE_DIR
 
+
+
+
 #def get_pose_inference(filepath="poseestimator/800Kräfte_auf_skifahrer_am_hang.jpeg"):
 def get_pose_inference(filepath="poseestimator/MenschenNebeneinander.jpg"):
     """Uses MMPose to infer poses from an image. Result format
