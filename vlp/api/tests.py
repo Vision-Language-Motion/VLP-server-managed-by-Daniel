@@ -6,7 +6,6 @@ from server.settings import BASE_DIR
 # Create your tests here.
 
 '''testing download_video function'''
-
 class DownloadVideoTest(TestCase):
     def test_video_download(self):
         '''Testing the download_video function by downloading a video 
@@ -20,6 +19,7 @@ class DownloadVideoTest(TestCase):
         # Check if the file exists in the download directory
         assert(os.path.exists(video_path))
 
+'''testing delete function'''
 class DeleteTest(TestCase):
     def test_delete_file(self):
         '''Testing the delete_file function by downloading a video deleting the file 
@@ -33,4 +33,6 @@ class DeleteTest(TestCase):
         # Checking if the file exists
         assert(not (os.path.exists(file_path)))
 
+'''testing Create Folder function'''
     
+'''testing Delete Folder function'''
