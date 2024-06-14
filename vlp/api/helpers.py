@@ -2,6 +2,8 @@ import os
 import yt_dlp as youtube_dl
 from server.settings import BASE_DIR
 from moviepy.editor import VideoFileClip
+from scenedetect import open_video, SceneManager
+from scenedetect.detectors import ContentDetector
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
@@ -96,3 +98,39 @@ def get_video_area(video : VideoFileClip):
     This function returns the area of the video in pixels
     """
     return video.size[0] * video.size[1]
+
+
+def detect_video_scenes(input_video_path, threshold=30.0, format='timecode'):
+    '''
+    This function detects the scenes in a video, seperated by cuts.
+    Returns a list of timestamps in the specified Format (either 'timecode', 'seconds', or 'frames').
+    '''
+    # Open the video file
+    video = open_video(input_video_path)
+
+    # Add ContentDetector algorithm with adjustable threshold
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector(threshold=threshold))
+
+    # Perform scene detection
+    scene_manager.detect_scenes(video)
+    scene_list = scene_manager.get_scene_list()
+
+    # convert list into the correct format
+    formatted_scene_list = []
+    for i, scene in enumerate(scene_list):
+        if format == 'timecode':
+            start_time = scene[0].get_timecode()
+            end_time = scene[1].get_timecode()
+        elif format == 'seconds':
+            start_time = scene[0].get_seconds()
+            end_time = scene[1].get_seconds()
+        elif format == 'frames':
+            start_time = scene[0].get_frames()
+            end_time = scene[1].get_frames()
+        else:
+            raise ValueError("Invalid format specified. Use 'timecode', 'seconds', or 'frames'.")
+
+        formatted_scene_list.append([start_time, end_time])
+    
+    return formatted_scene_list
