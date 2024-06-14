@@ -100,11 +100,11 @@ def get_video_area(video : VideoFileClip):
     return video.size[0] * video.size[1]
 
 
-def detect_video_scenes(input_video_path, threshold=30.0, format='timecode'):
-    '''
-    This function detects the scenes in a video, seperated by cuts.
-    Returns a list of timestamps in the specified Format (either 'timecode', 'seconds', or 'frames').
-    '''
+'''
+detect_video_scenes() detects the scenes in a video, seperated by cuts.
+Returns a list of timestamps in seconds.
+'''
+def detect_video_scenes(input_video_path, threshold=30.0):
     # Open the video file
     video = open_video(input_video_path)
 
@@ -119,17 +119,8 @@ def detect_video_scenes(input_video_path, threshold=30.0, format='timecode'):
     # convert list into the correct format
     formatted_scene_list = []
     for i, scene in enumerate(scene_list):
-        if format == 'timecode':
-            start_time = scene[0].get_timecode()
-            end_time = scene[1].get_timecode()
-        elif format == 'seconds':
-            start_time = scene[0].get_seconds()
-            end_time = scene[1].get_seconds()
-        elif format == 'frames':
-            start_time = scene[0].get_frames()
-            end_time = scene[1].get_frames()
-        else:
-            raise ValueError("Invalid format specified. Use 'timecode', 'seconds', or 'frames'.")
+        start_time = scene[0].get_seconds()
+        end_time = scene[1].get_seconds()
 
         formatted_scene_list.append([start_time, end_time])
     
