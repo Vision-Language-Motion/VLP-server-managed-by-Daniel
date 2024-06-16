@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 import os
 from .helpers import download_directory, download_video, delete_file
 from server.settings import BASE_DIR
+from .tasks import process_video_without_human
 
 # Create your tests here.
 
@@ -34,3 +35,7 @@ class DeleteTest(TestCase):
         assert(not (os.path.exists(file_path)))
 
     
+class PysceneTest(TestCase):
+    def test_pyscene(self):
+        video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
+        print(process_video_without_human(video_url))

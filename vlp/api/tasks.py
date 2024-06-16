@@ -1,8 +1,6 @@
 from celery import shared_task
 from .helpers import download_video, delete_file, create_folder_from_video_path, delete_folder_from_video_path, \
-                    take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, detect_video_scenes,  \
-                    calculate_scene_durations
-                    
+                    take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, detect_video_scenes
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,8 +24,7 @@ def process_video_without_human(url):
     video = get_video_file_clip(video_file_path)
     
     # get the scenes and calculate their durations
-    video_scenes = detect_video_scenes(video_file_path, threshold=30.0, format='timecode')
-    video_scene_durations = calculate_scene_durations(video_scenes)
+    video_scenes = detect_video_scenes(video, threshold=30.0)
     
     prediction_scenes = []
 
