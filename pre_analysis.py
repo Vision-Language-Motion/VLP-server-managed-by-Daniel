@@ -48,7 +48,6 @@ def get_table_names():
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 
 def connect_and_retrieve(query):
@@ -75,7 +74,6 @@ def connect_and_retrieve(query):
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 def get_unprocessed_rows():
     try:
@@ -109,7 +107,6 @@ def get_unprocessed_rows():
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 def update_processed_rows():
     try:
@@ -140,7 +137,6 @@ def update_processed_rows():
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 
 def update_processed_rows_by_url(url):
@@ -172,7 +168,6 @@ def update_processed_rows_by_url(url):
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 def add_new_url(youtube_url):
     try:
@@ -204,11 +199,8 @@ def add_new_url(youtube_url):
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
-# Definining download directory
-download_directory = os.path.join(os.getcwd(), 'youtube-downloads')
-os.makedirs(download_directory, exist_ok=True)
+
 
 # Download
 def download_video(url):
@@ -259,7 +251,6 @@ def make_test_url_false():
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 
 def add_timestamp(video_id, start_time, end_time):
@@ -292,7 +283,6 @@ def add_timestamp(video_id, start_time, end_time):
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 
 # Video Analysis
@@ -364,7 +354,6 @@ def add_multiple_timestamps(video_id, scenes):
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 
 def fetch_timestamps(print_output=False):
@@ -398,10 +387,13 @@ def fetch_timestamps(print_output=False):
         if connection:
             cursor.close()
             connection.close()
-            print("PostgreSQL connection is closed")
 
 
 if __name__ == "__main__":
+    # Definining download directory
+    download_directory = os.path.join(os.getcwd(), 'youtube-downloads')
+    os.makedirs(download_directory, exist_ok=True)
+
     # new_youtube_url = 'https://www.youtube.com/shorts/MkzFodsSOHc'  # insert url here
     # add_new_url(new_youtube_url)
     # make_test_url_false()
