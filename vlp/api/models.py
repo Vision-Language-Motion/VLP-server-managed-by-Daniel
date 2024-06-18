@@ -41,7 +41,7 @@ class Video(models.Model):
 
 class URL(models.Model):
     # Store the URL
-    url = models.URLField()
+    url = models.URLField(unique=True)
 
     is_processed = models.BooleanField(default=False)
 

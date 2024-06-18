@@ -1,0 +1,272 @@
+from dotenv import load_dotenv
+import os
+import yt_dlp as youtube_dl
+import psycopg2
+
+load_dotenv()
+
+
+# Database connection parameters
+db_params = {
+    'dbname': 'defaultdb',
+    'user': 'doadmin',
+    'password': os.environ.get('DO_DATABASE_PASSWORD', None),
+    'host': 'vlp-database-docker-do-user-10555764-0.c.db.ondigitalocean.com',
+    'port': '25060'
+}
+
+def get_table_names():
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Query to get all table names
+        query = """
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        """
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Fetch all table names
+        tables = cursor.fetchall()
+
+        # Print the table names
+        for table in tables:
+            print(table[0])
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+
+def connect_and_retrieve(query):
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Fetch all rows from the executed query
+        rows = cursor.fetchall()
+
+        # Print the retrieved data
+        for row in rows:
+            print(row)
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+def get_unprocessed_rows():
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Query to get rows where is_processed is False
+        query = """
+        SELECT * FROM api_url
+        WHERE is_processed = FALSE
+        """
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Fetch all rows
+        rows = cursor.fetchall()
+
+        # Print the rows
+        for row in rows:
+            print(row)
+
+        return rows
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+def update_processed_rows():
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Update query to set is_processed to True
+        update_query = """
+        UPDATE api_url
+        SET is_processed = TRUE
+        WHERE is_processed = FALSE
+        """
+
+        # Execute the update query
+        cursor.execute(update_query)
+
+        # Commit the transaction
+        connection.commit()
+
+        print(f"{cursor.rowcount} rows updated to is_processed = True")
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+
+def update_processed_rows_by_url(url):
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Update query to set is_processed to True
+        update_query = """
+        UPDATE api_url
+        SET is_processed = TRUE
+        WHERE url = (%s)
+        """ 
+
+        # Execute the update query
+        cursor.execute(update_query, (url,))
+
+        # Commit the transaction
+        connection.commit()
+
+        print(f"{cursor.rowcount} rows updated to is_processed = True")
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+def add_new_url(youtube_url):
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # SQL query to insert a new record
+        insert_query = """
+        INSERT INTO api_url (url, is_processed)
+        VALUES (%s, %s)
+        """
+        # Values to be inserted
+        values = (youtube_url, False)
+
+        # Execute the insert query
+        cursor.execute(insert_query, values)
+
+        # Commit the transaction
+        connection.commit()
+
+        print("New URL added successfully")
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+# Definining download directory
+download_directory = os.path.join(os.getcwd(), 'youtube-downloads')
+os.makedirs(download_directory, exist_ok=True)
+
+# Download
+def download_video(url):
+    """
+    This function creates a variable ydl_opts containing how the video should be downloaded 
+    and then uses the yt_dlp module to download the video into the download_directory
+    """
+    ydl_opts = {
+        'format': 'best[height<=720]',  # best quality up to 720p
+        'outtmpl': f'{download_directory}/%(id)s.%(ext)s',  # Save file as the video ID
+        'postprocessors': [{
+            'key': 'FFmpegVideoConvertor',
+            'preferedformat': 'mp4',  # Ensure the video is in mp4 format
+        }]
+    }
+
+    # Create a YoutubeDL object with the options
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+    
+    video_id = youtube_dl.YoutubeDL().extract_info(url, download=False)['id']
+    file_path = f"{download_directory}/{video_id}.mp4"
+    return file_path
+
+def make_test_url_false():
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Query to get rows where is_processed is False
+        query = """
+        UPDATE api_url
+        SET is_processed = FALSE
+        WHERE url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        """
+
+        # Execute the query
+        cursor.execute(query)
+
+        connection.commit()
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+
+if __name__ == "__main__":
+    # new_youtube_url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'  # insert url here
+    # add_new_url(new_youtube_url)
+    make_test_url_false()
+    rows = get_unprocessed_rows()
+    for row in rows:
+        url = row[1]
+        file_path = download_video(url)
+        update_processed_rows_by_url(url)
+    
