@@ -22,7 +22,9 @@ def check_video_conditions(sender, instance, **kwargs):
         logger.warn("Loading task")
         
         from .tasks import process_video_without_human
-        pred = process_video_without_human(instance.url)
+        timestamps, preds = process_video_without_human(instance.url)
+        pred = preds[0]
+
         if pred["overall_prediction"] == "multiple":
             instance.human_presence = Video.MULTIPLE
         elif pred["overall_prediction"] == "single":
