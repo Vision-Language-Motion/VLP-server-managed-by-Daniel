@@ -402,8 +402,8 @@ def fetch_timestamps(print_output=False):
 
 
 if __name__ == "__main__":
-    new_youtube_url = 'https://www.youtube.com/shorts/MkzFodsSOHc'  # insert url here
-    add_new_url(new_youtube_url)
+    # new_youtube_url = 'https://www.youtube.com/shorts/MkzFodsSOHc'  # insert url here
+    # add_new_url(new_youtube_url)
     # make_test_url_false()
     rows = get_unprocessed_rows()
     for row in rows:
