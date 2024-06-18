@@ -4,9 +4,6 @@ from .helpers import download_directory, download_video, delete_file
 from server.settings import BASE_DIR
 from .tasks import process_video_without_human
 
-# Create your tests here.
-
-'''testing download_video function'''
 
 class DownloadVideoTest(TestCase):
     def test_video_download(self):
@@ -36,6 +33,11 @@ class DeleteTest(TestCase):
 
     
 class PysceneTest(TestCase):
+    """Test the process_video_without_human function from tasks.py with the
+       new pyscene implementation."""
+
     def test_pyscene(self):
         video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
-        print(process_video_without_human(video_url))
+        timestamps, preds = process_video_without_human(video_url)
+        assert(len(preds) == len(timestamps))
+        assert(len(preds) > 0)

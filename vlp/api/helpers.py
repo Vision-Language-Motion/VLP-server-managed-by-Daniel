@@ -100,11 +100,13 @@ def get_video_area(video : VideoFileClip):
     return video.size[0] * video.size[1]
 
 
-'''
-detect_video_scenes() detects the scenes in a video, seperated by cuts.
-Returns a list of timestamps in seconds.
-'''
+
 def detect_video_scenes(input_video_path, threshold=30.0):
+    '''
+    detects the scenes in a video, seperated by cuts.
+    Returns a list of timestamps in seconds.
+    '''
+
     # Open the video file
     video = open_video(input_video_path)
 
