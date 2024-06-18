@@ -37,3 +37,14 @@ class Video(models.Model):
     def __init__(self, *args, **kwargs):
         super(Video, self).__init__(*args, **kwargs)
         self._processed_by_signal = False
+
+
+class URL(models.Model):
+    # Store the URL
+    url = models.URLField()
+
+    is_processed = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return self.url

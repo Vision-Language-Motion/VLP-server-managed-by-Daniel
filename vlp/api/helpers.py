@@ -4,6 +4,8 @@ from server.settings import BASE_DIR
 from moviepy.editor import VideoFileClip
 from scenedetect import open_video, SceneManager
 from scenedetect.detectors import ContentDetector
+from .models import URL
+from django.db import transaction
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
@@ -127,3 +129,18 @@ def detect_video_scenes(input_video_path, threshold=30.0):
         formatted_scene_list.append([start_time, end_time])
     
     return formatted_scene_list
+
+def add_urls_to_db(urls):
+     # Fetch existing URLs
+    existing_urls = URL.objects.filter(url__in=urls).values_list('url', flat=True)
+
+    # Determine new URLs to be added
+    new_urls = [url for url in urls if url not in existing_urls]
+
+    # Bulk create new URL objects
+    with transaction.atomic():
+        URL.objects.bulk_create([URL(url=url) for url in new_urls])
+
+    # Fetch all URLs after insertion
+    all_urls = URL.objects.filter(url__in=urls)
+    response_data = [{'id': url.id, 'url': url.url} for url in all_urls]
