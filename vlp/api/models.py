@@ -48,3 +48,16 @@ class URL(models.Model):
 
     def __str__(self):
         return self.url
+    
+class VideoTimeStamps(models.Model):
+    # Store the video
+    video = models.ForeignKey(URL, on_delete=models.CASCADE)
+
+    # Store the start time
+    start_time = models.FloatField()
+    
+    # Store the end time
+    end_time = models.FloatField()
+
+    def __str__(self):
+        return self.video.url + " " + str(self.start_time) + " " + str(self.end_time)

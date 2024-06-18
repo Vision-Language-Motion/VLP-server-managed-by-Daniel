@@ -2,7 +2,9 @@ from dotenv import load_dotenv
 import os
 import yt_dlp as youtube_dl
 import psycopg2
-
+from psycopg2.extras import execute_values
+from scenedetect import open_video, SceneManager
+from scenedetect.detectors import ContentDetector
 load_dotenv()
 
 
@@ -260,13 +262,154 @@ def make_test_url_false():
             print("PostgreSQL connection is closed")
 
 
+def add_timestamp(video_id, start_time, end_time):
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # SQL query to insert a new timestamp
+        insert_query = """
+        INSERT INTO api_videotimestamps (video_id, start_time, end_time)
+        VALUES (%s, %s, %s)
+        """
+        # Values to be inserted
+        values = (video_id, start_time, end_time)
+
+        # Execute the insert query
+        cursor.execute(insert_query, values)
+
+        # Commit the transaction
+        connection.commit()
+
+        print("Timestamp added successfully")
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+
+# Video Analysis
+def detect_video_scenes(input_video_path, threshold=30.0):
+    '''
+    detects the scenes in a video, seperated by cuts.
+    Returns a list of timestamps in seconds.
+    '''
+
+    # Open the video file
+    video = open_video(input_video_path)
+
+    # Add ContentDetector algorithm with adjustable threshold
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector(threshold=threshold))
+
+    # Perform scene detection
+    scene_manager.detect_scenes(video)
+    scene_list = scene_manager.get_scene_list()
+
+    # convert list into the correct format
+    formatted_scene_list = []
+    for i, scene in enumerate(scene_list):
+        start_time = scene[0].get_seconds()
+        end_time = scene[1].get_seconds()
+
+        formatted_scene_list.append([start_time, end_time])
+    
+    return formatted_scene_list
+
+def add_multiple_timestamps(video_id, scenes):
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # Check if there are existing timestamps for the video
+        check_query = """
+        SELECT 1 FROM api_videotimestamps
+        WHERE video_id = %s
+        LIMIT 1
+        """
+        cursor.execute(check_query, (video_id,))
+        if cursor.fetchone():
+            print("Timestamps already exist for this video. Exiting.")
+            return
+
+        # SQL query to insert multiple timestamps
+        insert_query = """
+        INSERT INTO api_videotimestamps (video_id, start_time, end_time)
+        VALUES %s
+        """
+        # Create a list of tuples for the values to be inserted
+        values = [(video_id, scene[0], scene[1]) for scene in scenes]
+
+        # Use psycopg2's execute_values for efficient bulk insert
+        execute_values(cursor, insert_query, values)
+
+        # Commit the transaction
+        connection.commit()
+
+        print("Timestamps added successfully")
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+
+def fetch_timestamps(print_output=False):
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+
+        # SQL query to fetch timestamps for a given video ID
+        fetch_query = """
+        SELECT * 
+        FROM api_videotimestamps
+        """
+        # Execute the fetch query
+        cursor.execute(fetch_query)
+
+        # Fetch all rows
+        rows = cursor.fetchall()
+
+        # Print the rows
+        if print_output:
+            for row in rows:
+                print(f"Video Id {row[3]}, Start Time: {row[1]}, End Time: {row[2]}")
+        return rows
+    
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error while connecting to PostgreSQL: {error}")
+
+    finally:
+        # Close the database connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+
 if __name__ == "__main__":
-    # new_youtube_url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'  # insert url here
-    # add_new_url(new_youtube_url)
-    make_test_url_false()
+    new_youtube_url = 'https://www.youtube.com/shorts/MkzFodsSOHc'  # insert url here
+    add_new_url(new_youtube_url)
+    # make_test_url_false()
     rows = get_unprocessed_rows()
     for row in rows:
         url = row[1]
         file_path = download_video(url)
         update_processed_rows_by_url(url)
+        scenes = detect_video_scenes(file_path)
+        add_multiple_timestamps(row[0], scenes)
     
