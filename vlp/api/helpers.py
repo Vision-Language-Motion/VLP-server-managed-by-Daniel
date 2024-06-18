@@ -2,6 +2,7 @@ import os
 import yt_dlp as youtube_dl
 from server.settings import BASE_DIR
 from moviepy.editor import VideoFileClip
+from googleapiclient.discovery import build
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
