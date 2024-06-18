@@ -24,7 +24,7 @@ def process_video_without_human(url):
     video = get_video_file_clip(video_file_path)
     
     # get the scenes and calculate their durations
-    video_scenes = detect_video_scenes(video_file_path, threshold=30.0)
+    video_scenes = detect_video_scenes(video_file_path, threshold=28.0)
     
     prediction_scenes = []
 
