@@ -1,8 +1,9 @@
 from django.test import TestCase, Client
 import os
-from .helpers import download_directory, download_video, delete_file
+from .helpers import download_directory, download_video, delete_file, add_Url_to_db
 from server.settings import BASE_DIR
 from .tasks import process_video_without_human
+from .models import URL
 
 
 class DownloadVideoTest(TestCase):
@@ -31,7 +32,7 @@ class DeleteTest(TestCase):
         # Checking if the file exists
         assert(not (os.path.exists(file_path)))
 
-    
+
 class PysceneTest(TestCase):
     """Test the process_video_without_human function from tasks.py with the
        new pyscene implementation."""
@@ -41,3 +42,12 @@ class PysceneTest(TestCase):
         timestamps, preds = process_video_without_human(video_url)
         assert(len(preds) == len(timestamps))
         assert(len(preds) > 0)
+
+
+class AddUrlToDB(TestCase):
+    """Test the add_Url_to_db by adding a Url to the URL model and then checking if it exists"""
+    
+    def test_add_Url_to_db(self):
+        video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
+        add_Url_to_db(video_url)
+        assert(URL.objects.filter(url= video_url).exists())

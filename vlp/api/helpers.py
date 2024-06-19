@@ -169,10 +169,10 @@ def search_videos(query, video_amount):
     
    # Adding the Urls into the URL model
     for item in response['items']:
-        add_Url(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
+        add_Url_to_db(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
 
 
-def add_Url(Url):
+def add_Url_to_db(Url):
  '''
  This function adds an url to the URL model 
  (and marks it as per default with false for is_processed )
@@ -180,8 +180,4 @@ def add_Url(Url):
  # Save the URL to the database
  url_instance, created = URL.objects.get_or_create(url = Url)
  
- if created:
-     print(f'URL {Url} has been added to the database.')
- else:
-     print(f'URL {Url} already exists in the database.')
 
