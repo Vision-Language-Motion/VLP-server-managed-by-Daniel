@@ -11,7 +11,10 @@ from googleapiclient.discovery import build
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
-youtube = build('youtube', 'v3', developerKey=os.environ.get("GOOGLE_DEV_API_KEY"))
+
+# Create a service object for interacting with the API
+youtube = build('youtube', 'v3', developerKey = "GOOGLE_DEV_API_KEY")
+
 
 # Download
 def download_video(url):
@@ -150,8 +153,7 @@ def add_urls_to_db(urls):
 
 
 
-# Create a service object for interacting with the API
-youtube = build('youtube', 'v3', developerKey = "GOOGLE_DEV_API_KEY")
+
 
 def search_videos(query, video_amount = 50):
     '''
