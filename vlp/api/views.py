@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Video
-from .serializers import VideoSerializer
+from .models import Video, Keyword
+from .serializers import VideoSerializer, KeywordSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
@@ -20,3 +20,9 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+class KeywordViewSet(viewsets.ModelViewSet):
+    queryset = Keyword.objects.all().order_by('queue_pos')
+    serializer_class = KeywordSerializer
+
+    

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Video(models.Model):
     # Store the YouTube URL
@@ -37,3 +38,23 @@ class Video(models.Model):
     def __init__(self, *args, **kwargs):
         super(Video, self).__init__(*args, **kwargs)
         self._processed_by_signal = False
+
+class Keyword(models.Model):
+    
+    word = models.CharField(max_length=255, unique=True)
+    queue_pos = models.PositiveIntegerField(unique=True)
+    last_processed = models.DateTimeField(null=True, blank=True)
+
+    def should_be_requeued(self):
+        if self.last_processed is None:
+            return True
+        # requeue after 7 days for example
+        return (timezone.now() - self.last_processed).days > 7
+
+    def __str__(self):
+        return f"{self.queue_pos}: {self.word}"
+    
+    def save(self, *args, **kwargs):
+        if not self.last_processed:
+            self.last_processed = timezone.now()  # Set current time if not set
+        super(Keyword, self).save(*args, **kwargs)

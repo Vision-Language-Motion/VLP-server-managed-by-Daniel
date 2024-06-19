@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
+youtube = build('youtube', 'v3', developerKey=os.environ.get("GOOGLE_DEV_API_KEY"))
 
 # Download
 def download_video(url):
@@ -100,7 +101,6 @@ def get_video_area(video : VideoFileClip):
     return video.size[0] * video.size[1]
 
 
-youtube = build('youtube', 'v3', developerKey=os.environ.get(GOOGLE_DEV_API_KEY))
 def search_videos(query, max_results=10):
     # Make a request to the API's search.list method to retrieve videos
     request = youtube.search().list(
@@ -116,4 +116,6 @@ def search_videos(query, max_results=10):
     for item in response['items']:
         urls.append(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
 
-    print(urls)
+    return(urls)
+
+
