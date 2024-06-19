@@ -151,9 +151,9 @@ def add_urls_to_db(urls):
 # Create a service object for interacting with the API
 youtube = build('youtube', 'v3', developerKey = "GOOGLE_DEV_API_KEY")
 
-def search_videos(query, video_amount):
+def search_videos(query, video_amount = 50):
     '''
-    Accepts a query and video_amount to use the youtube API to search for videos 
+    Accepts a query and video_amount (default: 50) to use the youtube API to search for videos 
     and then fills them into the URL model as unprocessed videos
     '''
 
