@@ -5,8 +5,10 @@ ARG CUDNN="7"
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 ARG AUTH_PASSWORD
 ARG DO_DATABASE_PASSWORD
+ARG GOOGLE_DEV_API_KEY=""
 ENV DO_DATABASE_PASSWORD=$DO_DATABASE_PASSWORD
 ENV AUTH_PASSWORD=$AUTH_PASSWORD
+ENV GOOGLE_DEV_API_KEY=$GOOGLE_DEV_API_KEY
 
 
 
@@ -30,7 +32,7 @@ RUN python -c 'import mmcv;print(mmcv.__version__)'
 
 RUN pip install importlib-metadata==4.13.0
 
-RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary whitenoise celery==5.1.0 redis yt-dlp moviepy google-api-python-client
+RUN pip install Django djangorestframework python-dotenv gunicorn psycopg2-binary whitenoise celery==5.1.0 redis yt-dlp moviepy scenedetect google-api-python-client
 
 
 

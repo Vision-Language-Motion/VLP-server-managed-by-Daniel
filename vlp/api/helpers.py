@@ -2,6 +2,10 @@ import os
 import yt_dlp as youtube_dl
 from server.settings import BASE_DIR
 from moviepy.editor import VideoFileClip
+from scenedetect import open_video, SceneManager
+from scenedetect.detectors import ContentDetector
+from .models import URL
+from django.db import transaction
 from googleapiclient.discovery import build
 
 
@@ -101,21 +105,45 @@ def get_video_area(video : VideoFileClip):
     return video.size[0] * video.size[1]
 
 
-def search_videos(query, max_results=10):
-    # Make a request to the API's search.list method to retrieve videos
-    request = youtube.search().list(
-        part ='snippet',
-        q = query,
-        type = 'video',
-        maxResults = max_results
-    )
+
+def detect_video_scenes(input_video_path, threshold=30.0):
+    '''
+    detects the scenes in a video, seperated by cuts.
+    Returns a list of timestamps in seconds.
+    '''
+
+    # Open the video file
+    video = open_video(input_video_path)
+
+    # Add ContentDetector algorithm with adjustable threshold
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector(threshold=threshold))
+
+    # Perform scene detection
+    scene_manager.detect_scenes(video)
+    scene_list = scene_manager.get_scene_list()
+
+    # convert list into the correct format
+    formatted_scene_list = []
+    for i, scene in enumerate(scene_list):
+        start_time = scene[0].get_seconds()
+        end_time = scene[1].get_seconds()
+
+        formatted_scene_list.append([start_time, end_time])
     
-    response = request.execute()
-    urls = []
-   #Creating Array with the Urls
-    for item in response['items']:
-        urls.append(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
+    return formatted_scene_list
 
-    return(urls)
+def add_urls_to_db(urls):
+     # Fetch existing URLs
+    existing_urls = URL.objects.filter(url__in=urls).values_list('url', flat=True)
 
+    # Determine new URLs to be added
+    new_urls = [url for url in urls if url not in existing_urls]
 
+    # Bulk create new URL objects
+    with transaction.atomic():
+        URL.objects.bulk_create([URL(url=url) for url in new_urls])
+
+    # Fetch all URLs after insertion
+    all_urls = URL.objects.filter(url__in=urls)
+    response_data = [{'id': url.id, 'url': url.url} for url in all_urls]

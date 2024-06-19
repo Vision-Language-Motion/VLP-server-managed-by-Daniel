@@ -39,6 +39,30 @@ class Video(models.Model):
         super(Video, self).__init__(*args, **kwargs)
         self._processed_by_signal = False
 
+
+class URL(models.Model):
+    # Store the URL
+    url = models.URLField(unique=True)
+
+    is_processed = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return self.url
+    
+class VideoTimeStamps(models.Model):
+    # Store the video
+    video = models.ForeignKey(URL, on_delete=models.CASCADE)
+
+    # Store the start time
+    start_time = models.FloatField()
+    
+    # Store the end time
+    end_time = models.FloatField()
+
+    def __str__(self):
+        return self.video.url + " " + str(self.start_time) + " " + str(self.end_time)
+
 class Keyword(models.Model):
     
     word = models.CharField(max_length=255, unique=True)
