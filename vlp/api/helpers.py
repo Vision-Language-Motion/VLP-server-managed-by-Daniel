@@ -6,6 +6,7 @@ from scenedetect import open_video, SceneManager
 from scenedetect.detectors import ContentDetector
 from .models import URL
 from django.db import transaction
+from googleapiclient.discovery import build
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
@@ -144,3 +145,39 @@ def add_urls_to_db(urls):
     # Fetch all URLs after insertion
     all_urls = URL.objects.filter(url__in=urls)
     response_data = [{'id': url.id, 'url': url.url} for url in all_urls]
+
+
+
+# Create a service object for interacting with the API
+youtube = build('youtube', 'v3', developerKey = "GOOGLE_DEV_API_KEY")
+
+def search_videos(query, video_amount = 50):
+    '''
+    Accepts a query and video_amount (default: 50) to use the youtube API to search for videos 
+    and then fills them into the URL model as unprocessed videos
+    '''
+
+    # Make a request to the API's search.list method to retrieve videos
+    request = youtube.search().list(
+        part ='snippet',
+        q = query,
+        type = 'video',
+        maxResults = video_amount
+    )
+    
+    response = request.execute()
+    
+   # Adding the Urls into the URL model
+    for item in response['items']:
+        add_Url_to_db(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
+
+
+def add_Url_to_db(Url):
+ '''
+ This function adds an url to the URL model 
+ (and marks it as per default with false for is_processed )
+ '''
+ # Save the URL to the database
+ url_instance, created = URL.objects.get_or_create(url = Url)
+ 
+
