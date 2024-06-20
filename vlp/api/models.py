@@ -66,14 +66,19 @@ class VideoTimeStamps(models.Model):
 class Keyword(models.Model):
     
     word = models.CharField(max_length=255, unique=True)
-    queue_pos = models.PositiveIntegerField(unique=True)
     last_processed = models.DateTimeField(null=True, blank=True)
+    use_counter = models.PositiveIntegerField(default=0)
 
     def should_be_requeued(self):
         if self.last_processed is None:
             return True
         # requeue after 7 days for example
         return (timezone.now() - self.last_processed).days > 7
+    
+    def update_used_keyword(self, count=1):
+        self.use_counter += count
+        self.last_processed = timezone.now()
+        self.save(update_fields=['use_counter'])
 
     def __str__(self):
         return f"{self.queue_pos}: {self.word}"

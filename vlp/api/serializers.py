@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Video, Keyword
+from .models import Video
 from server.settings import AUTH_PASSWORD_FOR_REQUESTS
 
 class VideoSerializer(serializers.ModelSerializer):
@@ -32,25 +32,4 @@ class VideoSerializer(serializers.ModelSerializer):
         if password != AUTH_PASSWORD_FOR_REQUESTS:
             raise serializers.ValidationError("Invalid password.")
         validated_data.pop('password', None)  
-        return super().create(validated_data)
-    
-class KeywordSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
-
-    class Meta:
-        model = Keyword
-        fields = ['word', 'queue_pos', 'last_processed', 'password']
-        extra_kwargs = {
-            'last_processed': {'required': False},  # Since last_processed is optional
-        }
-
-    def create(self, validated_data):
-        """
-        Check that the provided password matches the required password.
-        """
-        password = self.initial_data.get('password', None)
-        if password != AUTH_PASSWORD_FOR_REQUESTS:
-            raise serializers.ValidationError("Invalid password.")
-        validated_data.pop('password', None) 
-
         return super().create(validated_data)
