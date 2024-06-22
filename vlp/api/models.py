@@ -73,10 +73,10 @@ class Keyword(models.Model):
         return f"{self.word}: {self.last_processed} :{self.use_counter}"
 
 
-    def update_used_keyword(self, count=1):
+    def update_used_keyword(self, count=0):
         self.use_counter += count
         self.last_processed = timezone.now()
-        self.save(update_fields=['use_counter'])
+        self.save(update_fields=['use_counter', 'last_processed'])
 
     
     def save(self, *args, **kwargs):
