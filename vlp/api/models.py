@@ -71,15 +71,21 @@ class Keyword(models.Model):
     quality_metric = models.DecimalField(default = 0, decimal_places=4, max_digits=8)
     
     def update_used_keyword(self, count=1):
-        self.use_counter += count
-        self.last_processed = timezone.now()
-        self.save(update_fields=['use_counter'])
 
     def __str__(self):
-        return f"Keyword '{self.word}'"
+        return f"{self.word}: {self.last_processed} :{self.use_counter}"
+
+
+    def update_used_keyword(self, count=0):
+        self.use_counter += count
+        self.last_processed = timezone.now()
+        self.save(update_fields=['use_counter', 'last_processed'])
+
     
     def save(self, *args, **kwargs):
         if not self.last_processed:
             self.last_processed = timezone.now() - timezone.now()  # Set to time 0 if not set
         super(Keyword, self).save(*args, **kwargs)
 
+    class Meta:
+        ordering = ['-last_processed', 'use_counter']
