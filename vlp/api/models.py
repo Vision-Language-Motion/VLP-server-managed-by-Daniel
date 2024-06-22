@@ -70,7 +70,6 @@ class Keyword(models.Model):
     use_counter = models.PositiveIntegerField(default=0)
     quality_metric = models.DecimalField(default = 0, decimal_places=4, max_digits=8)
     
-    def update_used_keyword(self, count=1):
 
     def __str__(self):
         return f"{self.word}: {self.last_processed} :{self.use_counter}"
