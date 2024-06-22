@@ -4,7 +4,7 @@ from server.settings import BASE_DIR
 from moviepy.editor import VideoFileClip
 from scenedetect import open_video, SceneManager
 from scenedetect.detectors import ContentDetector
-from .models import URL
+from .models import URL, Query
 from django.db import transaction
 from googleapiclient.discovery import build
 
@@ -185,3 +185,9 @@ def add_Url_to_db(Url):
  url_instance, created = URL.objects.get_or_create(url = Url)
  
 
+def add_Keyword_to_Query(Keyword):
+ '''
+ This function adds an Keyword to the Query model 
+ (default: last_processed = BLANK, use_counter = 0, quality metric = 0)
+ '''
+ keyword_instance, created = Query.objects.get_or_create(keyword = Keyword)
