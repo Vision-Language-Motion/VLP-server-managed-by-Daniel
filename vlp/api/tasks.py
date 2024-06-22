@@ -1,7 +1,7 @@
 from celery import shared_task
 from .helpers import download_video, delete_file, create_folder_from_video_path, delete_folder_from_video_path, \
                     take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, \
-                    search_videos
+                    search_videos_and_add_to_db
 from .models import Keyword, Video
 from django.utils import timezone
 from server.settings import AUTH_PASSWORD_FOR_REQUESTS
@@ -137,34 +137,18 @@ def process_video_without_human(url):
     delete_file(video_file_path)
     delete_folder_from_video_path(video_file_path)
 
-    return video_scenes , prediction_scenes@shared_task
+    return video_scenes , prediction_scenes
+
+@shared_task
 def process_videos_for_keyword(word):
     try:
         keyword = Keyword.objects.get(word=word)
-        # get urls and process videos
-        urls = search_videos(word) 
-        for url in urls:
-            try:
-                if not Video.objects.get(url=url).DoesNotExist:
-                    video = Video.objects.create(url=url)
-                    video.keywords.add(word)
-            except Exception as e:
-                logger.error(e)
+        # get urls and create Video objects
+        search_videos_and_add_to_db(word)
         # reset last processed timestamp
         keyword.last_processed = timezone.now()
-        # put at end of queue
-        keyword.queue_pos = Keyword.objects.all().order_by('queue_pos')[-1].queue_pos+1
-        for kw in Keyword.objects.all():
-            kw.queue_pos -= 1
-            kw.save()
+        # put at end of queue and update queue
+        keyword.use_counter += 1
+        keyword.save()
     except Keyword.DoesNotExist:
         logger.error(f"Keyword {Keyword} doesn't exist.")
-
-@shared_task
-def cycle_keywords():
-    # requeue keywords for processing
-    keywords = Keyword.objects.all().order_by('queue_pos')
-    for keyword in keywords:
-        # determine if keyword should be requeued based on last_processed time
-        if keyword.should_be_requeued():
-            process_videos_for_keyword.delay(keyword.keyword)

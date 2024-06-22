@@ -91,10 +91,26 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
+if DEBUG or ENV != "production":
+    DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'defaultdb',
+            'USER': 'doadmin',
+            'PASSWORD': DO_DATABASE_PASSWORD,
+            'HOST': 'vlp-database-docker-do-user-10555764-0.c.db.ondigitalocean.com',  # This should match the service name in docker-compose
+            'PORT': '25060',
+            'OPTIONS': {
+                'sslmode': 'require',
+                'sslrootcert': os.path.join(BASE_DIR, 'certificates/ca-certificate.crt'),
+            }
         }
     }
 

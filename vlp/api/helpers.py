@@ -155,7 +155,7 @@ def add_urls_to_db(urls):
 
 
 
-def search_videos(query, video_amount = 50):
+def search_videos_and_add_to_db(query, video_amount = 50):
     '''
     Accepts a query and video_amount (default: 50) to use the youtube API to search for videos 
     and then fills them into the URL model as unprocessed videos

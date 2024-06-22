@@ -68,12 +68,7 @@ class Keyword(models.Model):
     word = models.CharField(max_length=255, unique=True)
     last_processed = models.DateTimeField(null=True, blank=True)
     use_counter = models.PositiveIntegerField(default=0)
-
-    def should_be_requeued(self):
-        if self.last_processed is None:
-            return True
-        # requeue after 7 days for example
-        return (timezone.now() - self.last_processed).days > 7
+    quality_metric = models.DecimalField(default = 0, decimal_places=4, max_digits=8)
     
     def update_used_keyword(self, count=1):
         self.use_counter += count
@@ -81,9 +76,10 @@ class Keyword(models.Model):
         self.save(update_fields=['use_counter'])
 
     def __str__(self):
-        return f"{self.queue_pos}: {self.word}"
+        return f"Keyword '{self.word}'"
     
     def save(self, *args, **kwargs):
         if not self.last_processed:
-            self.last_processed = timezone.now()  # Set current time if not set
+            self.last_processed = timezone.now() - timezone.now()  # Set to time 0 if not set
         super(Keyword, self).save(*args, **kwargs)
+
