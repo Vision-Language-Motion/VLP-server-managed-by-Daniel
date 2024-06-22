@@ -63,16 +63,16 @@ class VideoTimeStamps(models.Model):
     def __str__(self):
         return self.video.url + " " + str(self.start_time) + " " + str(self.end_time)
 
-class Keyword(models.Model):
+class Query(models.Model):
     
-    word = models.CharField(max_length=255, unique=True)
+    keyword = models.CharField(max_length=255, unique=True)
     last_processed = models.DateTimeField(null=True, blank=True)
     use_counter = models.PositiveIntegerField(default=0)
     quality_metric = models.DecimalField(default = 0, decimal_places=4, max_digits=8)
     
 
     def __str__(self):
-        return f"{self.word}: {self.last_processed} :{self.use_counter}"
+        return f"{self.keyword}: {self.last_processed} :{self.use_counter}"
 
 
     def update_used_keyword(self, count=0):
@@ -84,7 +84,7 @@ class Keyword(models.Model):
     def save(self, *args, **kwargs):
         if not self.last_processed:
             self.last_processed = timezone.now() - timezone.now()  # Set to time 0 if not set
-        super(Keyword, self).save(*args, **kwargs)
+        super(Query, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['-last_processed', 'use_counter']

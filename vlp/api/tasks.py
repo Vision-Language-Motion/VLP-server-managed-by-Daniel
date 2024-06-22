@@ -2,7 +2,7 @@ from celery import shared_task
 from .helpers import download_video, delete_file, create_folder_from_video_path, delete_folder_from_video_path, \
                     take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, \
                     search_videos_and_add_to_db
-from .models import Keyword, Video
+from .models import Query, Video
 from django.utils import timezone
 from server.settings import AUTH_PASSWORD_FOR_REQUESTS
 
@@ -142,7 +142,7 @@ def process_video_without_human(url):
 @shared_task
 def process_videos_for_keyword(word):
     try:
-        keyword = Keyword.objects.get(word=word)
+        keyword = Query.objects.get(word=word)
         # get urls and create Video objects
         search_videos_and_add_to_db(word)
         # reset last processed timestamp
@@ -150,5 +150,5 @@ def process_videos_for_keyword(word):
         # put at end of queue and update queue
         keyword.use_counter += 1
         keyword.save()
-    except Keyword.DoesNotExist:
-        logger.error(f"Keyword {Keyword} doesn't exist.")
+    except Query.DoesNotExist:
+        logger.error(f"Keyword {Query} doesn't exist.")
