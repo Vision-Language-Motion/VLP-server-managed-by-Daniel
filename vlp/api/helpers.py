@@ -7,6 +7,7 @@ from scenedetect.detectors import ContentDetector
 from .models import URL, Query
 from django.db import transaction
 from googleapiclient.discovery import build
+from datetime import datetime
 
 
 # Definining download directory
@@ -188,6 +189,6 @@ def add_Url_to_db(Url):
 def add_Keyword_to_Query(Keyword):
  '''
  This function adds an Keyword to the Query model 
- (default: last_processed = BLANK, use_counter = 0, quality metric = 0)
+ (default: use_counter = 0, quality metric = 0)
  '''
- keyword_instance, created = Query.objects.get_or_create(keyword = Keyword)
+ keyword_instance, created = Query.objects.get_or_create(keyword=Keyword,defaults={"last_processed": datetime(1, 1, 1, 0, 0)})
