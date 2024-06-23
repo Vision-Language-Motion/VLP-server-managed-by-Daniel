@@ -33,11 +33,9 @@ def upload_file(request):
             # Process uploaded file to extract keywords
             keywords_list = extract_keywords_from_file(uploaded_file)
 
-           
-
             # Save keywords to Query model
             for keyword in keywords_list:
-                keyword = keyword.strip()  # Ensure to strip whitespace
+                keyword = keyword.strip().lower()  # Ensure to strip whitespace, forces lowercase for no case sensitive duplicates
                 if keyword:  # Only process non-empty keywords
                     Query.objects.get_or_create(keyword=keyword,defaults={"last_processed": datetime(1, 1, 1, 0, 0)})
                     
