@@ -47,7 +47,7 @@ class URL(models.Model):
 
 
     def __str__(self):
-        return self.url
+        return self.url + " " + str(self.is_processed) + " " + str(self.id)
     
 class VideoTimeStamps(models.Model):
     # Store the video
@@ -61,3 +61,11 @@ class VideoTimeStamps(models.Model):
 
     def __str__(self):
         return self.video.url + " " + str(self.start_time) + " " + str(self.end_time)
+    
+class Prediction(models.Model):
+    video_timestamp = models.ForeignKey(VideoTimeStamps, on_delete=models.CASCADE)
+
+    prediction = models.CharField(max_length=2, blank=True, null=True)
+
+    def __str__(self):
+        return self.video_timestamp.video.url + " " + str(self.video_timestamp.start_time) + " " + str(self.video_timestamp.end_time) + " " + self.prediction
