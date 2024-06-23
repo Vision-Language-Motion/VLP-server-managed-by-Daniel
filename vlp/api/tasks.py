@@ -9,7 +9,7 @@ from poseestimator.helpers import get_bbox_area_ratio, check_bbox_score, check_k
                                     max_shoulder_score, max_knee_score, get_pose_inference, \
                                     three_keypoints_among_shoulders_elbows_hands_visible
 import time as timeit
-
+import os
 
 
 @shared_task()
@@ -133,3 +133,27 @@ def process_video_without_human(url):
     delete_folder_from_video_path(video_file_path)
 
     return video_scenes , prediction_scenes
+
+
+# myapp/tasks.py
+
+from celery import shared_task
+import paramiko
+
+@shared_task
+def daily_ssh_task():
+    if not os.environ.get('SSH_Key'):
+        return "No SSH Key found"
+
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    private_key_path = '/path/to/your/private_key'
+    key = paramiko.RSAKey.from_private_key_file(private_key_path)
+    ssh.connect('XXXX', username='XXXX', pkey=key)
+
+    stdin, stdout, stderr = ssh.exec_command('path_to_your_script')
+    output = stdout.read()
+    ssh.close()
+    
+    # Optional: log the output or handle it as needed
+    print(output)
