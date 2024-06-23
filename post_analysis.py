@@ -59,7 +59,7 @@ def insert_csv_file_in_db(filepath="./predictions.csv"):
                 insert_prediction_to_db(video_id, start_time, end_time, prediction)
 
     except (Exception, psycopg2.Error) as error:
-        print(f"Error while connecting to PostgreSQL: {error}")
+        print(f"Error while connecting to PostgreSQL or the file does not exist: {error}")
 
 
 def fetch_urls(print_output=False):
