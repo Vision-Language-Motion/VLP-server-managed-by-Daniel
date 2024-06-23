@@ -5,29 +5,17 @@ from server.settings import BASE_DIR
 from .tasks import process_video_without_human, query_search
 from .models import URL, Query
 from datetime import datetime
-
-
-class DownloadVideoTest(TestCase):
-    def test_video_download(self):
-        '''Testing the download_video function by downloading a video 
-           and then checking if it exist in the download directory '''
-        #The video we are using for this Test 
-        video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
-    
-        # Download the video
-        video_path = download_video(video_url)
-
-        # Check if the file exists in the download directory
-        assert(os.path.exists(video_path))
+from django.utils import timezone
 
 '''testing delete function'''
 class DeleteTest(TestCase):
     def test_delete_file(self):
-        '''Testing the delete_file function by downloading a video deleting the file 
-           and checking if it exists afterwards'''
+        '''Testing the download_video and delete_file function by downloading a video, checking if it exists 
+           then deleting the file and checking if it exists afterwards'''
         # Creating test file
         file_path = download_video('https://www.youtube.com/shorts/AsrP4ji_Dtw')
-        
+
+        assert(os.path.exists(file_path))
         # Delete the file
         delete_file(file_path)
 
@@ -89,6 +77,23 @@ class AddKeywordDuplicate(TestCase):
         # Assert that only one entry exists
         self.assertEqual(query_count, 1)
 
-class QuerySearch(TestCase):
+class QuerySearchTestCase(TestCase):
+    """Test case for the query_search shared task."""
+
+    def setUp(self):
+        # Create some dummy Query objects for testing
+        Query.objects.create(keyword='keyword1')
+        Query.objects.create(keyword='keyword2')
+
     def test_query_search(self):
+        # Call the task function
         query_search()
+
+        # Assert that top 100 keywords are processed
+        top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')[:100]
+        self.assertEqual(len(top_100_keywords), 2)  # Assuming only 2 dummy keywords are created
+
+        # Assert that each keyword was updated correctly
+        for keyword in top_100_keywords:
+            self.assertEqual(keyword.last_processed.date(), timezone.now().date())  # Check last_processed
+            self.assertEqual(keyword.use_counter, 1)  # Check use_counter (assuming it starts from 0)
