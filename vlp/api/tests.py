@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 import os
 from .helpers import download_directory, download_video, delete_file, add_Url_to_db, add_Keyword_to_Query
 from server.settings import BASE_DIR
-from .tasks import process_video_without_human
+from .tasks import process_video_without_human, query_search
 from .models import URL, Query
 from datetime import datetime
 
@@ -62,3 +62,8 @@ class AddKeywordQuery(TestCase):
         keyword = 'workout'
         add_Keyword_to_Query(keyword)
         assert(Query.objects.filter(keyword=keyword).exists())       
+
+class QuerySearch(TestCase):
+
+    def test_query_search(self):
+        query_search()

@@ -4,6 +4,7 @@ from .helpers import download_video, delete_file, create_folder_from_video_path,
                     search_videos_and_add_to_db
 from .models import Query, Video
 from django.utils import timezone
+from django.db.models import F,Subquery, OuterRef
 from server.settings import AUTH_PASSWORD_FOR_REQUESTS
 
 
@@ -139,16 +140,23 @@ def process_video_without_human(url):
 
     return video_scenes , prediction_scenes
 
+
 @shared_task
-def process_videos_for_keyword(word):
-    try:
-        keyword = Query.objects.get(word=word)
-        # get urls and create Video objects
-        search_videos_and_add_to_db(word)
-        # reset last processed timestamp
-        keyword.last_processed = timezone.now()
-        # put at end of queue and update queue
-        keyword.use_counter += 1
-        keyword.save()
-    except Query.DoesNotExist:
-        logger.error(f"Keyword {Query} doesn't exist.")
+def query_search():
+    
+    logger.warn("Searching for videos with  first 100 Keywords in Query")
+    # Subquery to get the top 100 keywords' IDs
+    top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')
+    logger.warn(print(top_100_keywords))
+    logger.warn("Subquery with top 100 Keywords")
+    # for keyword in top_100_ids:
+    #    search_videos_and_add_to_db(keyword.keyword)
+    # Update the last_processed field for the top 100 keywords
+    Query.objects.filter(id__in=Subquery(top_100_keywords)).update(last_processed=timezone.now())
+    # Update the use_counter field for the top 100 keywords
+    # Query.objects.filter(id__in=Subquery(top_100_keywords)).update(use_counter=F('use_counter') + 1)
+   
+
+
+
+
