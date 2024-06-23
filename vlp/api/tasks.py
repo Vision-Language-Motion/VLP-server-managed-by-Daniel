@@ -145,16 +145,23 @@ def process_video_without_human(url):
 def query_search():
     logger.warn("Searching for videos with  first 100 Keywords in Query")
     # Subquery to get the top 100 keywords' IDs
-    top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')
+    top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')[:100]
     logger.warn(top_100_keywords)
     logger.warn("Subquery with top 100 Keywords")
-    # for keyword in top_100_ids:
-    #    search_videos_and_add_to_db(keyword.keyword)
-    # Update the last_processed field for the top 100 keywords
-    for keyword in top_100_keywords: 
-        keyword.update(last_processed=timezone.now())
+    for keyword in top_100_keywords:
+        search_videos_and_add_to_db(keyword.keyword)
+        # Updating keyword in query
+        keyword.update(last_processed=timezone.now(), use_counter=F('use_counter') + 1 )
         keyword.save()
-    # Update the use_counter field for the top 100 keywords
-    # Query.objects.filter(id__in=Subquery(top_100_keywords)).update(use_counter=F('use_counter') + 1)
+
+    
+
+   
+
+    
+   
+
+
+
 
     
