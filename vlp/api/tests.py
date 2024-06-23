@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 import os
-from .helpers import download_directory, download_video, delete_file, add_Url_to_db, add_Keyword_to_Query
+from .helpers import download_directory, download_video, delete_file, add_Url_to_db, add_keyword_to_Query
 from server.settings import BASE_DIR
 from .tasks import process_video_without_human, query_search
 from .models import URL, Query
@@ -56,14 +56,39 @@ class AddUrlToDB(TestCase):
 
 
 class AddKeywordQuery(TestCase):
-    """Test the add_Url_to_db by adding a Url to the URL model and then checking if it exists"""
+    """Test the add_Keyword_to_Query by adding a keyword to the Query model and then checking if it exists"""
     
     def test_add_Keyword_to_Query(self):
         keyword = 'workout'
-        add_Keyword_to_Query(keyword)
-        assert(Query.objects.filter(keyword=keyword).exists())       
+        add_keyword_to_Query(keyword)
+        assert(Query.objects.filter(keyword=keyword).exists())
+
+class AddKeywordDuplicate(TestCase):
+    """Test the add_keyword_to_Query by adding a keyword twice to the Query model and then checking if only one exists"""
+    
+    def test_add_duplicate_keyword_to_query(self):
+        """Test that adding a keyword in different cases and with whitespace results in a single entry."""
+
+        # Define the keywords
+        keyword_with_trailing_space = 'workout '
+        keyword_capitalized = 'Workout'
+
+        # Add the first keyword
+        add_keyword_to_Query(keyword_with_trailing_space)
+
+        try:
+            # try adding the second keyword
+            add_keyword_to_Query(keyword_capitalized)
+        except:
+            pass
+
+        # Check the database for the cleaned keyword
+        cleaned_keyword = 'workout'
+        query_count = Query.objects.filter(keyword=cleaned_keyword).count()
+
+        # Assert that only one entry exists
+        self.assertEqual(query_count, 1)
 
 class QuerySearch(TestCase):
-
     def test_query_search(self):
         query_search()

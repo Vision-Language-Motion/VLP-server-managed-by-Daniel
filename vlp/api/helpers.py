@@ -178,17 +178,17 @@ def search_videos_and_add_to_db(query, video_amount = 50):
 
 
 def add_Url_to_db(Url):
- '''
- This function adds an url to the URL model 
- (and marks it as per default with false for is_processed )
- '''
- # Save the URL to the database
- url_instance, created = URL.objects.get_or_create(url = Url)
+    '''
+    This function adds an url to the URL model 
+    (and marks it as per default with false for is_processed)
+    '''
+    # Save the URL to the database
+    url_instance, created = URL.objects.get_or_create(url = Url)
  
 
-def add_Keyword_to_Query(Keyword):
- '''
- This function adds an Keyword to the Query model 
- (default: use_counter = 0, quality metric = 0)
- '''
- keyword_instance, created = Query.objects.get_or_create(keyword=Keyword,defaults={"last_processed": datetime(1, 1, 1, 0, 0)})
+def add_keyword_to_Query(Keyword):
+    '''
+    This function adds an Keyword to the Query model 
+    (default: use_counter = 0, quality metric = 0)
+    '''
+    keyword_instance, created = Query.objects.get_or_create(keyword=Keyword, defaults={"last_processed": datetime(1, 1, 1, 0, 0)})

@@ -4,7 +4,7 @@ from rest_framework import status
 from .models import Video, Query
 from .forms import FileUploadForm
 from .serializers import VideoSerializer
-from .helpers import add_Keyword_to_Query
+from .helpers import add_keyword_to_Query
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
@@ -38,7 +38,7 @@ def upload_file(request):
             for keyword in keywords_list:
                 keyword = keyword.strip().lower()  # Ensure to strip whitespace, forces lowercase for no case sensitive duplicates
                 if keyword:  # Only process non-empty keywords
-                    add_Keyword_to_Query(keyword)
+                    add_keyword_to_Query(keyword)
                     
     else:
         form = FileUploadForm()

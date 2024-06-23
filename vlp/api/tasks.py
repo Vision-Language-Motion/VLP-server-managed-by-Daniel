@@ -1,7 +1,7 @@
 from celery import shared_task
 from .helpers import download_video, delete_file, create_folder_from_video_path, delete_folder_from_video_path, \
                     take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, \
-                    search_videos_and_add_to_db
+                    search_videos_and_add_to_db, detect_video_scenes
 from .models import Query, Video
 from django.utils import timezone
 from django.db.models import F,Subquery, OuterRef
@@ -143,20 +143,18 @@ def process_video_without_human(url):
 
 @shared_task
 def query_search():
-    
     logger.warn("Searching for videos with  first 100 Keywords in Query")
     # Subquery to get the top 100 keywords' IDs
     top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')
-    logger.warn(print(top_100_keywords))
+    logger.warn(top_100_keywords)
     logger.warn("Subquery with top 100 Keywords")
     # for keyword in top_100_ids:
     #    search_videos_and_add_to_db(keyword.keyword)
     # Update the last_processed field for the top 100 keywords
-    Query.objects.filter(id__in=Subquery(top_100_keywords)).update(last_processed=timezone.now())
+    for keyword in top_100_keywords: 
+        keyword.update(last_processed=timezone.now())
+        keyword.save()
     # Update the use_counter field for the top 100 keywords
     # Query.objects.filter(id__in=Subquery(top_100_keywords)).update(use_counter=F('use_counter') + 1)
-   
 
-
-
-
+    

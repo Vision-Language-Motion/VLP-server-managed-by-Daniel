@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from datetime import datetime
 
 class Video(models.Model):
     # Store the YouTube URL
@@ -66,25 +67,28 @@ class VideoTimeStamps(models.Model):
 class Query(models.Model):
     
     keyword = models.CharField(max_length=255, unique=True)
-    last_processed = models.DateTimeField(null=True, blank=True)
+    last_processed = models.DateTimeField(null=True, blank=True, default=datetime(1, 1, 1, 0, 0))
     use_counter = models.PositiveIntegerField(default=0)
     quality_metric = models.DecimalField(default = 0, decimal_places=4, max_digits=8)
-    
 
     def __str__(self):
         return f"{self.keyword}: {self.last_processed} :{self.use_counter}"
-
 
     def update_used_keyword(self, count=0):
         self.use_counter += count
         self.last_processed = timezone.now()
         self.save(update_fields=['use_counter', 'last_processed'])
 
-    
+    def clean_keyword(self):
+        """
+        Cleans the keyword by stripping leading and trailing whitespaces and converting to lowercase.
+        """
+        self.keyword = self.keyword.strip().lower()
+
     def save(self, *args, **kwargs):
-        if not self.last_processed:
-            self.last_processed = timezone.now() - timezone.now()  # Set to time 0 if not set
-        super(Query, self).save(*args, **kwargs)
+        self.clean_keyword()
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-last_processed', 'use_counter']
+        unique_together = ('keyword',)  
