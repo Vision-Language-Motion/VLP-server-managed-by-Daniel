@@ -4,12 +4,12 @@ import shutil
 import json
 import csv
 from mmpose.apis import MMPoseInferencer
-from mmpretrain.models import VisionTransformer
+#from mmpretrain.models import VisionTransformer
 import time
 from scenedetect import VideoManager, SceneManager
 from scenedetect.detectors import ContentDetector
 
-#start_time = time.time()
+start_time = time.time()
 inferencer = MMPoseInferencer('rtmpose-l')
 
 def process_scene(scene_frames, scene_output_dir, frame_width, frame_height):
@@ -21,12 +21,11 @@ def process_scene(scene_frames, scene_output_dir, frame_width, frame_height):
     frame_qualities = []  # save frame quality (high, medium, low)
 
     for frame_count, frame in enumerate(scene_frames):
-        if frame_count % 30 == 0:  # sample per 30 frames
-            frame_path = os.path.join(scene_output_dir, f'{frame_count}.png')
-            cv2.imwrite(frame_path, frame)
-            frame_paths.append(frame_path)
-            result_generator = inferencer(frame_path, pred_out_dir=scene_output_dir)
-            next(result_generator)
+         frame_path = os.path.join(scene_output_dir, f'{frame_count}.png')
+         cv2.imwrite(frame_path, frame)
+         frame_paths.append(frame_path)
+         result_generator = inferencer(frame_path, pred_out_dir=scene_output_dir)
+         next(result_generator)
     
     for frame_path in frame_paths:
         json_path = frame_path.replace('.png', '.json')
@@ -60,7 +59,7 @@ def process_scene(scene_frames, scene_output_dir, frame_width, frame_height):
     return people_counts, frame_qualities
 
 
-def process_video(video_path, base_output_dir, csv_writer):
+def process_video(video_path, base_output_dir):
     video_name = os.path.basename(video_path).split('.')[0]
     video_output_dir = os.path.join(base_output_dir, 'temp', video_name)  # save temporal result
     os.makedirs(video_output_dir, exist_ok=True)
@@ -79,13 +78,16 @@ def process_video(video_path, base_output_dir, csv_writer):
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     
+    results = []
+
     for scene_num, scene in enumerate(scene_list):
         start_frame, end_frame = scene[0].get_frames(), scene[1].get_frames()
 
         scene_duration = (end_frame - start_frame) / cap.get(cv2.CAP_PROP_FPS)
         if scene_duration < 2:
             continue
-
+        
+        frame_count = 0
         scene_frames = []
 
         cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
@@ -93,7 +95,9 @@ def process_video(video_path, base_output_dir, csv_writer):
             ret, frame = cap.read() 
             if not ret: # something went wrong
                 break 
-            scene_frames.append(frame)
+            if frame_count % 30 == 0:  # sample per 30 frames
+                scene_frames.append(frame)
+            frame_count += 1
 
         scene_output_dir = os.path.join(video_output_dir, f'scene_{scene_num}')
         os.makedirs(scene_output_dir, exist_ok=True)
@@ -119,21 +123,29 @@ def process_video(video_path, base_output_dir, csv_writer):
         start_time = start_frame / cap.get(cv2.CAP_PROP_FPS)
         end_time = end_frame / cap.get(cv2.CAP_PROP_FPS)
 
-        csv_writer.writerow([video_name, start_time, end_time, classification])
+        results.append([video_name, start_time, end_time, classification])
     
     cap.release()
     shutil.rmtree(os.path.join(base_output_dir, 'temp'))
 
+    return results
 
+# ''' When testing remove the hashtag in this line 
 video_folder = '/home/markusc/MyP/openpose_estimation/webvid1k'  # input video folder, change to your own path
 base_output_dir = '/home/markusc/MyP/mmpose_estimation/process_in_batch/rtml24webvid1k'  # output folder, change to your own path
 video_formats = ['.mp4', '.avi', '.mov', '.mkv']  # add more video format if needed
 
+all_results = []
+
+for video_file in os.listdir(video_folder):
+    video_path = os.path.join(video_folder, video_file)
+    if os.path.isfile(video_path) and any(video_file.endswith(fmt) for fmt in video_formats):
+        video_results = process_video(video_path, base_output_dir)
+        all_results.extend(video_results)
+
 with open(os.path.join(base_output_dir, 'video_analysis_results.csv'), mode='w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(['Video Name', 'Start Time (s)', 'End Time (s)', 'Classification'])
-    
-    for video_file in os.listdir(video_folder):
-        video_path = os.path.join(video_folder, video_file)
-        if os.path.isfile(video_path) and any(video_file.endswith(fmt) for fmt in video_formats):
-            process_video(video_path, base_output_dir, csv_writer)
+    for result in all_results:
+        csv_writer.writerow(result)
+#'''
