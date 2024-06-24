@@ -9,8 +9,15 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'requeue-keywords-every-48-hours': {
-        'task': 'server.tasks.cycle_keywords',
-        'schedule': crontab(hour='*/48'),  # Run every 48 hours
+    'query-search-every-24-hours': {
+        'task': 'api.tasks.query_search',
+        # 'schedule': crontab(hour='*/24'),  # Runs every 24 hours
+        'schedule': crontab(minute='*/1'),  # Debugging: Runs every Mintue
+    },
+    'process-urls-every-hour': {
+        'task': 'api.tasks.process_urls',
+        # 'schedule': crontab(minute=0, hour='*/1'),  # Executes every hour
+        'schedule': crontab(minute='*/1'),  # Debugging: Runs every Mintue
+
     },
 }

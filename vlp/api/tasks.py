@@ -2,7 +2,7 @@ from celery import shared_task
 from .helpers import download_video, delete_file, create_folder_from_video_path, delete_folder_from_video_path, \
                     take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, \
                     search_videos_and_add_to_db, detect_video_scenes
-from .models import Query, Video
+from .models import Query, Video, URL
 from django.utils import timezone
 from django.db.models import F,Subquery, OuterRef
 from server.settings import AUTH_PASSWORD_FOR_REQUESTS
@@ -154,3 +154,12 @@ def query_search():
         keyword.update(last_processed=timezone.now(), use_counter=F('use_counter') + 1 )
         keyword.save()
         logger.warning(f"Keyword '{keyword.keyword}' queried and urls added to db")
+
+
+@shared_task
+def process_urls():
+    unprocessed_urls = URL.objects.filter(is_processed=False)
+    for url_obj in unprocessed_urls:
+        process_video_without_human.delay(url_obj.url)
+        url_obj.is_processed = True
+        url_obj.save()
