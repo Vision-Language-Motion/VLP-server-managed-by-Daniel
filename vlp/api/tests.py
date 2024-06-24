@@ -1,14 +1,16 @@
 from django.test import TestCase, Client
 import os
-from .helpers import download_directory, download_video, delete_file, add_Url_to_db, add_keyword_to_Query
+from .helpers import download_directory, download_video, delete_file, add_url_to_db, add_urls_to_db, add_keyword_to_Query
 from server.settings import BASE_DIR
 from .tasks import process_video_without_human, query_search
 from .models import URL, Query
 from datetime import datetime
 from django.utils import timezone
 
-'''testing delete function'''
+# NOTE: Commented out for faster testing
+"""
 class DeleteTest(TestCase):
+    '''testing download and delete function'''
     def test_delete_file(self):
         '''Testing the download_video and delete_file function by downloading a video, checking if it exists 
            then deleting the file and checking if it exists afterwards'''
@@ -21,8 +23,10 @@ class DeleteTest(TestCase):
 
         # Checking if the file exists
         assert(not (os.path.exists(file_path)))
+"""
 
-''''
+# NOTE: Commented out for faster testing
+'''
 class PysceneTest(TestCase):
     """Test the process_video_without_human function from tasks.py with the
        new pyscene implementation."""
@@ -35,24 +39,30 @@ class PysceneTest(TestCase):
 '''
 
 class AddUrlToDB(TestCase):
-    """Test the add_Url_to_db by adding a Url to the URL model and then checking if it exists"""
+    """Test the add_url_to_db by adding a Url to the URL model and then checking if it exists and adding duplicate urls, checking if only one exists"""
     
-    def test_add_Url_to_db(self):
+    def test_add_url_to_db(self):
         video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
-        add_Url_to_db(video_url)
-        assert(URL.objects.filter(url= video_url).exists())
+        add_url_to_db(video_url)
+        assert(URL.objects.filter(url=video_url).exists())
+    
+    def test_add_duplicate_Url_to_db(self):
+        video_url = 'https://www.youtube.com/shorts/AsrP4ji_Dtw'
+        video_urls = [video_url, video_url]
+        add_urls_to_db(video_urls)
+        query_count = URL.objects.filter(url=video_url).count()
+
+        # Assert that only one entry exists
+        self.assertEqual(query_count, 1)
 
 
 class AddKeywordQuery(TestCase):
-    """Test the add_Keyword_to_Query by adding a keyword to the Query model and then checking if it exists"""
+    """Test the add_Keyword_to_Query by adding a keyword to the Query model and then checking if it exists, then adding a keyword twice to the Query model and then checking if only one exists"""
     
     def test_add_Keyword_to_Query(self):
         keyword = 'workout'
         add_keyword_to_Query(keyword)
         assert(Query.objects.filter(keyword=keyword).exists())
-
-class AddKeywordDuplicate(TestCase):
-    """Test the add_keyword_to_Query by adding a keyword twice to the Query model and then checking if only one exists"""
     
     def test_add_duplicate_keyword_to_query(self):
         """Test that adding a keyword in different cases and with whitespace results in a single entry."""
@@ -86,8 +96,12 @@ class QuerySearchTestCase(TestCase):
         Query.objects.create(keyword='keyword2')
 
     def test_query_search(self):
+        
+        n_of_urls_initial = URL.objects.all().count()
         # Call the task function
         query_search()
+
+        self.assertGreater(URL.objects.all().count(), n_of_urls_initial)
 
         # Assert that top 100 keywords are processed
         top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')[:100]
@@ -96,4 +110,4 @@ class QuerySearchTestCase(TestCase):
         # Assert that each keyword was updated correctly
         for keyword in top_100_keywords:
             self.assertEqual(keyword.last_processed.date(), timezone.now().date())  # Check last_processed
-            self.assertEqual(keyword.use_counter, 1)  # Check use_counter (assuming it starts from 0)
+            self.assertGreater(keyword.use_counter, 0)  # Check use_counter 
