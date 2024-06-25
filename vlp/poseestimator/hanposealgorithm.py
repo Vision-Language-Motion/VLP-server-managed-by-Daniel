@@ -131,8 +131,13 @@ def process_video(video_path, base_output_dir):
     return results
 
 # ''' When testing remove the hashtag in this line 
-video_folder = '/home/markusc/MyP/openpose_estimation/webvid1k'  # input video folder, change to your own path
-base_output_dir = '/home/markusc/MyP/mmpose_estimation/process_in_batch/rtml24webvid1k'  # output folder, change to your own path
+# video_folder = '/home/markusc/MyP/openpose_estimation/webvid1k'  # input video folder, change to your own path
+video_folder = os.path.join(os.getcwd(), 'youtube-downloads')
+# base_output_dir = '/home/markusc/MyP/mmpose_estimation/process_in_batch/rtml24webvid1k'  # output folder, change to your own path
+base_output_dir = os.path.join(os.getcwd(), 'output')
+os.makedirs(video_folder, exist_ok=True)
+os.makedirs(base_output_dir, exist_ok=True)
+
 video_formats = ['.mp4', '.avi', '.mov', '.mkv']  # add more video format if needed
 
 all_results = []
@@ -143,7 +148,7 @@ for video_file in os.listdir(video_folder):
         video_results = process_video(video_path, base_output_dir)
         all_results.extend(video_results)
 
-with open(os.path.join(base_output_dir, 'video_analysis_results.csv'), mode='w', newline='') as csv_file:
+with open(os.path.join(base_output_dir, 'predictions.csv'), mode='w+', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(['Video Name', 'Start Time (s)', 'End Time (s)', 'Classification'])
     for result in all_results:

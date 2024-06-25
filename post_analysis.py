@@ -47,7 +47,7 @@ def get_table_names():
             cursor.close()
             connection.close()
 
-def insert_csv_file_in_db(filepath="./predictions.csv"):
+def insert_csv_file_in_db(filepath="./output/predictions.csv"):
     try:
         with open(filepath, mode='r') as csv_file:
             csv_reader = csv.DictReader(csv_file)
