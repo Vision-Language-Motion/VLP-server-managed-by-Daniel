@@ -2,48 +2,31 @@ import cv2
 import os
 import shutil
 import json
+import csv
 from mmpose.apis import MMPoseInferencer
-from mmpretrain.models import VisionTransformer
+#from mmpretrain.models import VisionTransformer
 import time
-
+from scenedetect import VideoManager, SceneManager
+from scenedetect.detectors import ContentDetector
 
 start_time = time.time()
 inferencer = MMPoseInferencer('rtmpose-l')
 
-def process_video(video_path, base_output_dir, save_frames, save_video, save_pose_image):
-    video_name = os.path.basename(video_path).split('.')[0]
-    video_output_dir = os.path.join(base_output_dir, 'temp', video_name)  # save temporal result
-    os.makedirs(video_output_dir, exist_ok=True)
-    
-    cap = cv2.VideoCapture(video_path)
-    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+def process_scene(scene_frames, scene_output_dir, frame_width, frame_height):
     frame_area = frame_width * frame_height
     min_bbox_area = frame_area / 60  # figure should be bigger than 1/60 of frame area
-    
-    frame_count = 0
+
     frame_paths = []  # store frame
     people_counts = []  # store number of visible human
-    frame_qualities = []  # save frame quality（high, medium, low）
-    
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        if frame_count % 30 == 0:  # sample per 30 frames
-            frame_path = os.path.join(video_output_dir, f'{frame_count}.png')
-            cv2.imwrite(frame_path, frame)
-            frame_paths.append(frame_path)
-            if save_pose_image: #choose save the pose image or not
-                vis_out_path = os.path.join(video_output_dir, f'{frame_count}_pose.png')
-                result_generator = inferencer(frame_path, pred_out_dir=video_output_dir, vis_out_dir=vis_out_path, draw_bbox=True)
-            else:
-                result_generator = inferencer(frame_path, pred_out_dir=video_output_dir)
-            next(result_generator)
-        frame_count += 1
-    
-    cap.release()
+    frame_qualities = []  # save frame quality (high, medium, low)
 
+    for frame_count, frame in enumerate(scene_frames):
+         frame_path = os.path.join(scene_output_dir, f'{frame_count}.png')
+         cv2.imwrite(frame_path, frame)
+         frame_paths.append(frame_path)
+         result_generator = inferencer(frame_path, pred_out_dir=scene_output_dir)
+         next(result_generator)
+    
     for frame_path in frame_paths:
         json_path = frame_path.replace('.png', '.json')
         with open(json_path, 'r') as file:
@@ -72,53 +55,97 @@ def process_video(video_path, base_output_dir, save_frames, save_video, save_pos
                         frame_qualities.append("low")
                 
             people_counts.append(visible_people)
-        
-    # classify after number of human figure(single, multiple, nohuman)
-    if all(count == 0 for count in people_counts):
-        destination_folder = 'nohuman'
-    elif any(people_counts[i] > 1  for i in range(len(people_counts))):
-        destination_folder = 'multiple'
-    else:
-        destination_folder = 'single'
-        #further subdivision in single category
-        high_count = sum(1 for i in range(len(frame_qualities) - 2) if all(q == "high" for q in frame_qualities[i:i+3]))
-        medium_count = sum(1 for i in range(len(frame_qualities) - 2) if all(q in ["medium", "high"] for q in frame_qualities[i:i+3]))
-        if high_count > 0:
-            destination_folder = os.path.join('single', 'high')
-        elif medium_count > 0:
-            destination_folder = os.path.join('single', 'medium')
-        else:
-            destination_folder = os.path.join('single', 'low')
-
-    final_video_dir = os.path.join(base_output_dir, destination_folder)
-    final_json_dir = os.path.join(final_video_dir, video_name)
-    os.makedirs(final_video_dir, exist_ok=True)
-    os.makedirs(final_json_dir, exist_ok=True)
     
-    if save_video: #choose save original video or not
-        shutil.copy(video_path, final_video_dir)
-    for frame_path in frame_paths:
-        json_path = frame_path.replace('.png', '.json')
-        shutil.copy(json_path, final_json_dir)
-        if save_pose_image:
-            pose_image_path = frame_path.replace('.png', '_pose.png')
-            shutil.copy(pose_image_path, final_json_dir)
-        if save_frames:
-            shutil.copy(frame_path, final_json_dir)
-        else:
-            os.remove(frame_path)
+    return people_counts, frame_qualities
 
+
+def process_video(video_path, base_output_dir):
+    video_name = os.path.basename(video_path).split('.')[0]
+    video_output_dir = os.path.join(base_output_dir, 'temp', video_name)  # save temporal result
+    os.makedirs(video_output_dir, exist_ok=True)
+    
+    # Detect scenes in the video
+    video_manager = VideoManager([video_path])
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector(threshold=28))
+    video_manager.set_downscale_factor()
+    video_manager.start()
+    scene_manager.detect_scenes(frame_source=video_manager)
+    scene_list = scene_manager.get_scene_list()
+    video_manager.release()
+
+    cap = cv2.VideoCapture(video_path)
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    results = []
+
+    for scene_num, scene in enumerate(scene_list):
+        start_frame, end_frame = scene[0].get_frames(), scene[1].get_frames()
+
+        scene_duration = (end_frame - start_frame) / cap.get(cv2.CAP_PROP_FPS)
+        if scene_duration < 2:
+            continue
+        
+        frame_count = 0
+        scene_frames = []
+
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+        for _ in range(start_frame, end_frame):
+            ret, frame = cap.read() 
+            if not ret: # something went wrong
+                break 
+            if frame_count % 30 == 0:  # sample per 30 frames
+                scene_frames.append(frame)
+            frame_count += 1
+
+        scene_output_dir = os.path.join(video_output_dir, f'scene_{scene_num}')
+        os.makedirs(scene_output_dir, exist_ok=True)
+        people_counts, frame_qualities = process_scene(scene_frames, scene_output_dir, frame_width, frame_height)
+        
+        # classify after number of human figure(single, multiple, nohuman)
+        if all(count == 0 for count in people_counts):
+            classification = 'nohuman'
+        elif any(count > 1 for count in people_counts):
+            classification = 'multiple'
+        else:
+            classification = 'single'
+            # further subdivision in single category
+            high_count = sum(1 for i in range(len(frame_qualities) - 2) if all(q == "high" for q in frame_qualities[i:i+3]))
+            medium_count = sum(1 for i in range(len(frame_qualities) - 2) if all(q in ["medium", "high"] for q in frame_qualities[i:i+3]))
+            if high_count > 0:
+                classification = 'single high'
+            elif medium_count > 0:
+                classification = 'single medium'
+            else:
+                classification = 'single low'
+
+        start_time = start_frame / cap.get(cv2.CAP_PROP_FPS)
+        end_time = end_frame / cap.get(cv2.CAP_PROP_FPS)
+
+        results.append([video_name, start_time, end_time, classification])
+    
+    cap.release()
     shutil.rmtree(os.path.join(base_output_dir, 'temp'))
 
+    return results
 
-video_folder = '/home/markusc/MyP/openpose_estimation/webvid1k' # input video folder, change to your own path
-base_output_dir = '/home/markusc/MyP/mmpose_estimation/process_in_batch/rtml24webvid1k' #output folder, change to your own path
-save_frames = False #trigger to save original frame
-save_video = False #trigger to save original video
-save_pose_image = False #trigger to save pose image
-video_formats = ['.mp4', '.avi', '.mov', '.mkv'] # add more video format if needed
+# ''' When testing remove the hashtag in this line 
+video_folder = '/home/markusc/MyP/openpose_estimation/webvid1k'  # input video folder, change to your own path
+base_output_dir = '/home/markusc/MyP/mmpose_estimation/process_in_batch/rtml24webvid1k'  # output folder, change to your own path
+video_formats = ['.mp4', '.avi', '.mov', '.mkv']  # add more video format if needed
+
+all_results = []
 
 for video_file in os.listdir(video_folder):
     video_path = os.path.join(video_folder, video_file)
-    if os.path.isfile(video_path) and any(video_file.endswith(fmt) for fmt in video_formats):  
-        process_video(video_path, base_output_dir, save_frames, save_video, save_pose_image)
+    if os.path.isfile(video_path) and any(video_file.endswith(fmt) for fmt in video_formats):
+        video_results = process_video(video_path, base_output_dir)
+        all_results.extend(video_results)
+
+with open(os.path.join(base_output_dir, 'video_analysis_results.csv'), mode='w', newline='') as csv_file:
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Video Name', 'Start Time (s)', 'End Time (s)', 'Classification'])
+    for result in all_results:
+        csv_writer.writerow(result)
+#'''
