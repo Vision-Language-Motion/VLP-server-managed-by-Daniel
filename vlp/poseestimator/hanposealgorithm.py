@@ -105,20 +105,20 @@ def process_video(video_path, base_output_dir):
         
         # classify after number of human figure(single, multiple, nohuman)
         if all(count == 0 for count in people_counts):
-            classification = 'nohuman'
+            classification = 'nh'  # nh
         elif any(count > 1 for count in people_counts):
-            classification = 'multiple'
+            classification = 'mu' # multiple
         else:
-            classification = 'single'
+            classification = 'si' # single
             # further subdivision in single category
             high_count = sum(1 for i in range(len(frame_qualities) - 2) if all(q == "high" for q in frame_qualities[i:i+3]))
             medium_count = sum(1 for i in range(len(frame_qualities) - 2) if all(q in ["medium", "high"] for q in frame_qualities[i:i+3]))
             if high_count > 0:
-                classification = 'single high'
+                classification = 'sh' # single high
             elif medium_count > 0:
-                classification = 'single medium'
+                classification = 'sm' # single medium
             else:
-                classification = 'single low'
+                classification = 'sl' # single low
 
         start_time = start_frame / cap.get(cv2.CAP_PROP_FPS)
         end_time = end_frame / cap.get(cv2.CAP_PROP_FPS)
