@@ -10,7 +10,6 @@ redis-server --daemonize yes
 sleep 5
 
 
-cd vlp
 # Start Django
 
 # Start Celery
@@ -21,7 +20,7 @@ gunicorn --bind 0.0.0.0:8000 server.wsgi:application
 
 # Start Celery Beat if needed
 # echo "Starting Celery Beat..."
-# celery -A server beat --loglevel=info &
+celery -A server beat --loglevel=info &
 
 echo "Django and Celery are running."
 
