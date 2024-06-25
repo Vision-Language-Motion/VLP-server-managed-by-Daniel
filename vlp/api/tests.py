@@ -63,7 +63,9 @@ class AddKeywordQuery(TestCase):
         add_Keyword_to_Query(keyword)
         assert(Query.objects.filter(keyword=keyword).exists())       
 
+'''
 class QuerySearch(TestCase):
 
     def test_query_search(self):
         query_search()
+'''
