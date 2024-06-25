@@ -49,7 +49,7 @@ class URL(models.Model):
 
 
     def __str__(self):
-        return self.url
+        return self.url + " " + str(self.is_processed) + " " + str(self.id)
     
 class VideoTimeStamps(models.Model):
     # Store the video
@@ -74,7 +74,7 @@ class Query(models.Model):
     def __str__(self):
         return f"{self.keyword}: {self.last_processed} :{self.use_counter}"
 
-    def update_used_keyword(self, count=0):
+    def update_used_keyword(self, count=1):
         self.use_counter += count
         self.last_processed = timezone.now()
         self.save(update_fields=['use_counter', 'last_processed'])
@@ -92,3 +92,11 @@ class Query(models.Model):
     class Meta:
         ordering = ['-last_processed', 'use_counter']
         unique_together = ('keyword',)  
+    
+class Prediction(models.Model):
+    video_timestamp = models.ForeignKey(VideoTimeStamps, on_delete=models.CASCADE)
+
+    prediction = models.CharField(max_length=2, blank=True, null=True)
+
+    def __str__(self):
+        return self.video_timestamp.video.url + " " + str(self.video_timestamp.start_time) + " " + str(self.video_timestamp.end_time) + " " + self.prediction
