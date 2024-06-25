@@ -1,6 +1,6 @@
 import os
 import yt_dlp as youtube_dl
-from server.settings import BASE_DIR
+from server.settings import BASE_DIR, GOOGLE_DEV_API_KEY
 from moviepy.editor import VideoFileClip
 from scenedetect import open_video, SceneManager
 from scenedetect.detectors import ContentDetector

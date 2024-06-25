@@ -151,11 +151,11 @@ def query_search():
     for keyword in top_100_keywords:
         search_videos_and_add_to_db(keyword.keyword)
         # Updating keyword in query
-        keyword.update(last_processed=timezone.now(), use_counter=F('use_counter') + 1 )
+        keyword.update_used_keyword
         keyword.save()
         logger.warning(f"Keyword '{keyword.keyword}' queried and urls added to db")
 
-
+'''
 @shared_task
 def process_urls():
     unprocessed_urls = URL.objects.filter(is_processed=False)
@@ -163,3 +163,4 @@ def process_urls():
         process_video_without_human.delay(url_obj.url)
         url_obj.is_processed = True
         url_obj.save()
+'''

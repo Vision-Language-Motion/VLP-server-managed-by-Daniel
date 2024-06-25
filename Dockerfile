@@ -52,7 +52,7 @@ WORKDIR /code/vlp
 # RUN celery -A server worker -l info
 
 
-RUN python manage.py makemigrations api && python manage.py migrate api
+RUN python manage.py makemigrations && python manage.py migrate
 
 RUN python manage.py collectstatic --noinput
 

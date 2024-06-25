@@ -24,6 +24,7 @@ IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'True').capitalize() == 'True'
 ENV = os.environ.get('ENVIRONMENT', 'production')
 DO_DATABASE_PASSWORD = os.environ.get('DO_DATABASE_PASSWORD', None)
 AUTH_PASSWORD_FOR_REQUESTS = os.environ.get('AUTH_PASSWORD', None)
+GOOGLE_DEV_API_KEY = os.environ.get('GOOGLE_DEV_API_KEY', None)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
