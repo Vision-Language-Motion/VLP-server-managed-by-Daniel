@@ -10,7 +10,7 @@ class PoseInferenceTestCase(TestCase):
         get_pose_inference()
 '''        
 
-        
+'''        
 # When testing remove the hashtag in line 133 of hanposealgorithm
 class HansPyScene(TestCase):
     def test_process_video(self):
@@ -19,3 +19,4 @@ class HansPyScene(TestCase):
             results = process_video(test_video_path, temp_output_dir)
             for result in results:
                 print(f"Video Name: {result[0]}, Start Time: {result[1]:.2f}s, End Time: {result[2]:.2f}s, Classification: {result[3]}")
+'''

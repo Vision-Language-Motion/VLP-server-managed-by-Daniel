@@ -6,6 +6,7 @@ from .models import Query, Video, URL
 from django.utils import timezone
 from django.db.models import F,Subquery, OuterRef
 from server.settings import AUTH_PASSWORD_FOR_REQUESTS
+from googleapiclient.errors import HttpError
 
 
 import logging
@@ -149,11 +150,23 @@ def query_search():
     logger.warning(top_100_keywords)
     logger.warning("Subquery with top 100 Keywords")
     for keyword in top_100_keywords:
-        search_videos_and_add_to_db(keyword.keyword)
+        try:
+         search_videos_and_add_to_db(keyword.keyword)
+
+        except HttpError as e:
+         if e.resp.status == 403 and 'quotaExceeded' in str(e):
+            logger.warning("YouTube API quota exceeded: " + str(e))
+            break
+         else:
+            # Handle other HttpErrors
+            logger.warning("HTTP error: " + str(e))
+            break
         # Updating keyword in query
         keyword.update_used_keyword
         keyword.save()
         logger.warning(f"Keyword '{keyword.keyword}' queried and urls added to db")
+    
+        
 
 '''
 @shared_task
