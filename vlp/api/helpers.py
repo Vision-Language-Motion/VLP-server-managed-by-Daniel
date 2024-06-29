@@ -14,7 +14,7 @@ from datetime import datetime
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
 
 # Create a service object for interacting with the API
-youtube = build('youtube', 'v3', developerKey = "GOOGLE_DEV_API_KEY")
+youtube = build('youtube', 'v3', developerKey = GOOGLE_DEV_API_KEY)
 
 # Download
 def download_video(url):

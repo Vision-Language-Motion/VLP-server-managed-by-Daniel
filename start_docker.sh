@@ -9,7 +9,7 @@ redis-server --daemonize yes
 
 sleep 5
 
-
+cd vlp
 # Start Django
 
 # Start Celery

@@ -18,7 +18,7 @@ from poseestimator.helpers import get_bbox_area_ratio, check_bbox_score, check_k
 import time as timeit
 
 
-
+'''
 @shared_task()
 def process_video_without_human(url):
     # load the package only when the task is called
@@ -140,7 +140,7 @@ def process_video_without_human(url):
     delete_folder_from_video_path(video_file_path)
 
     return video_scenes , prediction_scenes
-
+'''
 
 @shared_task
 def query_search():
