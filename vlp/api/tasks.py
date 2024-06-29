@@ -1,6 +1,13 @@
 from celery import shared_task
 from .helpers import download_video, delete_file, create_folder_from_video_path, delete_folder_from_video_path, \
-                    take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, detect_video_scenes
+                    take_screenshot_at_second, get_video_file_clip, get_video_duration, get_video_area, \
+                    search_videos_and_add_to_db, detect_video_scenes
+from .models import Query, Video, URL
+from django.utils import timezone
+from django.db.models import F,Subquery, OuterRef
+from server.settings import AUTH_PASSWORD_FOR_REQUESTS
+from googleapiclient.errors import HttpError
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -11,7 +18,7 @@ from poseestimator.helpers import get_bbox_area_ratio, check_bbox_score, check_k
 import time as timeit
 
 
-
+'''
 @shared_task()
 def process_video_without_human(url):
     # load the package only when the task is called
@@ -133,3 +140,40 @@ def process_video_without_human(url):
     delete_folder_from_video_path(video_file_path)
 
     return video_scenes , prediction_scenes
+'''
+
+@shared_task
+def query_search():
+    logger.warn("Searching for videos with  first 100 Keywords in Query")
+    # Subquery to get the top 100 keywords' IDs
+    top_100_keywords = Query.objects.order_by('-last_processed', 'use_counter')[:100]
+    logger.warning(top_100_keywords)
+    logger.warning("Subquery with top 100 Keywords")
+    for keyword in top_100_keywords:
+        try:
+         search_videos_and_add_to_db(keyword.keyword)
+
+        except HttpError as e:
+         if e.resp.status == 403 and 'quotaExceeded' in str(e):
+            logger.warning("YouTube API quota exceeded: " + str(e))
+            break
+         else:
+            # Handle other HttpErrors
+            logger.warning("HTTP error: " + str(e))
+            break
+        # Updating keyword in query
+        keyword.update_used_keyword
+        keyword.save()
+        logger.warning(f"Keyword '{keyword.keyword}' queried and urls added to db")
+    
+        
+
+'''
+@shared_task
+def process_urls():
+    unprocessed_urls = URL.objects.filter(is_processed=False)
+    for url_obj in unprocessed_urls:
+        process_video_without_human.delay(url_obj.url)
+        url_obj.is_processed = True
+        url_obj.save()
+'''

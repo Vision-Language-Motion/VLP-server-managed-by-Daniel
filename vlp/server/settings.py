@@ -19,11 +19,12 @@ import os
 load_dotenv()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False').capitalize() == 'True'
+IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'True').capitalize() == 'True'
 ENV = os.environ.get('ENVIRONMENT', 'production')
 DO_DATABASE_PASSWORD = os.environ.get('DO_DATABASE_PASSWORD', None)
 AUTH_PASSWORD_FOR_REQUESTS = os.environ.get('AUTH_PASSWORD', None)
+GOOGLE_DEV_API_KEY = os.environ.get('GOOGLE_DEV_API_KEY', None)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

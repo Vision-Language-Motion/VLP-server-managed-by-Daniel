@@ -1,15 +1,20 @@
 import os
 import yt_dlp as youtube_dl
-from server.settings import BASE_DIR
+from server.settings import BASE_DIR, GOOGLE_DEV_API_KEY
 from moviepy.editor import VideoFileClip
 from scenedetect import open_video, SceneManager
 from scenedetect.detectors import ContentDetector
-from .models import URL
+from .models import URL, Query
 from django.db import transaction
 from googleapiclient.discovery import build
+from datetime import datetime
+
 
 # Definining download directory
 download_directory = os.path.join(BASE_DIR,'youtube-downloads')
+
+# Create a service object for interacting with the API
+youtube = build('youtube', 'v3', developerKey = GOOGLE_DEV_API_KEY)
 
 # Download
 def download_video(url):
@@ -17,6 +22,7 @@ def download_video(url):
     This function creates a variable ydl_opts containing how the video should be downloaded 
     and then uses the yt_dlp module to download the video into the download_directory
     """
+    # ydl_opts specifies download paramter
     ydl_opts = {
         'format': 'best[height<=720]',  # best quality up to 720p
         'outtmpl': f'{download_directory}/%(id)s.%(ext)s',  # Save file as the video ID
@@ -34,7 +40,6 @@ def download_video(url):
     file_path = f"{download_directory}/{video_id}.mp4"
     return file_path
 
-
 # Delete 
 def delete_file(file_path):
     ''' This function checks if a file (/the directory) exists and deletes it'''
@@ -43,7 +48,7 @@ def delete_file(file_path):
 
     return file_path
 
-# Create/Delete Folder
+# Create/delete Folder
 def create_folder_from_video_path(video_path):
     ''' This function creates a folder from the video path'''
     video_id = video_path.split('.')[0]
@@ -53,7 +58,6 @@ def create_folder_from_video_path(video_path):
         os.makedirs(new_video_directory)
 
     return new_video_directory
-
 
 def delete_folder_from_video_path(video_path):
     ''' This function deletes a folder from the video path'''
@@ -71,13 +75,12 @@ def delete_folder_from_video_path(video_path):
 
     return video_directory
 
-
+# Video File clip and screenshots
 def get_video_file_clip(video_path):
     ''' This function returns a VideoFileClip object from the video path'''
     video = VideoFileClip(video_path)
     return video
 
-# Screenshots
 def take_screenshot_at_second(video : VideoFileClip, second, output_dir):
     """
     This function takes a screenshot of the video at a specific second and saves it to the output_path
@@ -95,13 +98,11 @@ def get_video_duration(video : VideoFileClip):
     """
     return video.duration
 
-
 def get_video_area(video : VideoFileClip):
     """
     This function returns the area of the video in pixels
     """
     return video.size[0] * video.size[1]
-
 
 
 def detect_video_scenes(input_video_path, threshold=30.0):
@@ -134,12 +135,14 @@ def detect_video_scenes(input_video_path, threshold=30.0):
     
     return formatted_scene_list
 
+
+
 def add_urls_to_db(urls):
-     # Fetch existing URLs
+    # Fetch existing URLs
     existing_urls = URL.objects.filter(url__in=urls).values_list('url', flat=True)
 
     # Determine new URLs to be added
-    new_urls = [url for url in urls if url not in existing_urls]
+    new_urls = set([url for url in urls if url not in existing_urls]) # set for no duplicates
 
     # Bulk create new URL objects
     with transaction.atomic():
@@ -150,11 +153,11 @@ def add_urls_to_db(urls):
     response_data = [{'id': url.id, 'url': url.url} for url in all_urls]
 
 
+def add_url_to_db(url):
+    add_urls_to_db([url])
 
-# Create a service object for interacting with the API
-youtube = build('youtube', 'v3', developerKey = "GOOGLE_DEV_API_KEY")
 
-def search_videos(query, video_amount = 50):
+def search_videos_and_add_to_db(query, video_amount = 50):
     '''
     Accepts a query and video_amount (default: 50) to use the youtube API to search for videos 
     and then fills them into the URL model as unprocessed videos
@@ -172,15 +175,12 @@ def search_videos(query, video_amount = 50):
     
    # Adding the Urls into the URL model
     for item in response['items']:
-        add_Url_to_db(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
+        add_url_to_db(f"https://www.youtube.com/watch?v={item['id']['videoId']}")
 
 
-def add_Url_to_db(Url):
- '''
- This function adds an url to the URL model 
- (and marks it as per default with false for is_processed )
- '''
- # Save the URL to the database
- url_instance, created = URL.objects.get_or_create(url = Url)
- 
-
+def add_keyword_to_Query(Keyword):
+    '''
+    This function adds an Keyword to the Query model 
+    (default: use_counter = 0, quality metric = 0)
+    '''
+    keyword_instance, created = Query.objects.get_or_create(keyword=Keyword, defaults={"last_processed": datetime(1, 1, 1, 0, 0)})

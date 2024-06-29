@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+'''
 @receiver(pre_save, sender=Video)
 def check_video_conditions(sender, instance, **kwargs):
     if instance._processed_by_signal:
@@ -38,5 +39,5 @@ def check_video_conditions(sender, instance, **kwargs):
 
         # task_id = process_video_without_human.delay(instance.url) delaying does not work with poseestimator
         instance._processed_by_signal = True  # Setze das Flag, um erneute Verarbeitung zu verhindern
-
+'''
 
