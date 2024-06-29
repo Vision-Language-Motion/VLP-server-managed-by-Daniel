@@ -19,8 +19,8 @@ import os
 load_dotenv()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').capitalize() == 'True'
-IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'True').capitalize() == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+IS_DOCKER_APP = os.environ.get('IS_DOCKER_APP', 'True') == 'True'
 ENV = os.environ.get('ENVIRONMENT', 'production')
 DO_DATABASE_PASSWORD = os.environ.get('DO_DATABASE_PASSWORD', None)
 AUTH_PASSWORD_FOR_REQUESTS = os.environ.get('AUTH_PASSWORD', None)

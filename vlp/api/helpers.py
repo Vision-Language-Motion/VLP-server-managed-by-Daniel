@@ -157,6 +157,13 @@ def add_url_to_db(url):
     add_urls_to_db([url])
 
 
+def mock_search_videos_and_add_to_db(query, video_amount = 50):
+    '''
+    This function mocks the search_videos_and_add_to_db function
+    '''
+    pass
+
+
 def search_videos_and_add_to_db(query, video_amount = 50):
     '''
     Accepts a query and video_amount (default: 50) to use the youtube API to search for videos 
