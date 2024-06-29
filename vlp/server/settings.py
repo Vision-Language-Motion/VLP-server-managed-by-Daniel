@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'poseestimator',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -195,3 +196,11 @@ LOGGING = {
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0' 
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'query-search-every-24-hours': {
+        'task': 'api.tasks.query_search',
+        'schedule': 3600*24,  # Run every 24hours
+        # 'schedule': 10,  # Run every 10 seconds
+    },
+}

@@ -6,23 +6,19 @@ sleep 1
 
 # Start Redis
 redis-server --daemonize yes
+sleep 5  # Adjust sleep time as needed for Redis to start
 
-sleep 5
-
+# Navigate to Django project directory
 cd vlp
-# Start Django
 
-# Start Celery
+# Start Celery worker
 celery -A server worker --loglevel=info &
 
-
-gunicorn --bind 0.0.0.0:8000 server.wsgi:application
-
 # Start Celery Beat if needed
-# echo "Starting Celery Beat..."
 celery -A server beat --loglevel=info &
 
-echo "Django and Celery are running."
+# Start Django with Gunicorn
+gunicorn --bind 0.0.0.0:8000 server.wsgi:application
 
 # Keep the shell open
 wait

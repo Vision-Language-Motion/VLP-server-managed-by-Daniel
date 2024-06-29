@@ -166,8 +166,9 @@ def query_search():
                 logger.warning("HTTP error: " + str(e))
                 break
         # Updating keyword in query
-        keyword.update_used_keyword
-        keyword.save()
+        if not DEBUG:
+            keyword.update_used_keyword
+            keyword.save()
         logger.warning(f"Keyword '{keyword.keyword}' queried and urls added to db")
     
         

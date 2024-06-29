@@ -174,3 +174,7 @@ cython_debug/
 *.part
 
 *.json
+
+celerybeat-schedule.bak
+celerybeat-schedule.dir
+celerybeat-schedule.dat

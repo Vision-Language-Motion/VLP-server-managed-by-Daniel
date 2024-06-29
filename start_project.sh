@@ -14,6 +14,7 @@ python3 manage.py runserver &
 # Start Celery
 celery -A server worker --loglevel=info &
 
+celery -A server beat --loglevel=warning &
 # Start Celery Beat if needed
 # echo "Starting Celery Beat..."
 # celery -A server beat --loglevel=info &

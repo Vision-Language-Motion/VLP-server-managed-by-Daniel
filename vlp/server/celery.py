@@ -1,21 +1,15 @@
 from celery import Celery
 from celery.schedules import crontab
 import os
+from .settings import INSTALLED_APPS
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
-app = Celery('server')
+app = Celery('server', include=['api.tasks'])
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
-
-app.conf.beat_schedule = {
-    'query-search-every-24-hours': {
-        'task': 'api.tasks.query_search',
-        'schedule': crontab(hour='*/24'),  # Runs every 24 hours
-        # 'schedule': crontab(minute='*/1'),  # Debugging: Runs every Mintue
-    },
-}
-
+app.autodiscover_tasks(lambda: INSTALLED_APPS)
+app.conf.result_backend = 'redis://localhost:6379/0'
+app.conf.broker_connection_retry_on_startup = True
 
 # Wird auf dem Cluster processed
 '''
